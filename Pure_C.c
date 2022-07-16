@@ -20,6 +20,8 @@ GRAPH graph = { 0, 0, 4, 200 };
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    MenuImport(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    MenuExport(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 LPDWORD             ColorAt(UINT, UINT, UINT, UINT);
 int                 Calc(UINT, UINT, UINT, UINT);
@@ -159,7 +161,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     PAINTSTRUCT ps;
     static LPDWORD lpPixel;
     static BITMAPINFO bmpInfo;
-    int x, y;
+    UINT x, y;
     static int mx = -100, my = -100;
     BOOL m_in = FALSE;
     UINT mlen = min(width, height);
@@ -169,9 +171,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
     {
-        mlen = min(width, height);
         width = GetSystemMetrics(SM_CXSCREEN);
         height = GetSystemMetrics(SM_CYSCREEN);
+        mlen = min(width, height);
         lpPixel = (LPDWORD)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, width * height * 4);
         // DIBの情報を設定する
         bmpInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -296,7 +298,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case IDM_EXIT:
             DestroyWindow(hWnd);
             break;
-        case IDM_SETCOLOR:
+        case IDM_IMPORT:
+            DialogBox(hInst, MAKEINTRESOURCE(IDD_IMBOX), hWnd, MenuImport);
+            break;
+        case IDM_EXPORT:
+            DialogBox(hInst, MAKEINTRESOURCE(IDD_EXBOX), hWnd, MenuExport);
             break;
         case IDM_ABOUT:
             DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
@@ -316,10 +322,93 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
+// メニュー 描画内容入力
+INT_PTR CALLBACK MenuImport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    TCHAR input[1024];// 入力内容保存用の変数
+
+    UNREFERENCED_PARAMETER(lParam);
+    switch (message)
+    {
+    case WM_INITDIALOG:
+        return (INT_PTR)TRUE;
+
+    case WM_COMMAND:
+        switch (LOWORD(wParam))
+        {
+        case IDCANCEL:
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+        case IDC_IMBTN:
+            // 入力の決定
+            GetDlgItemText(hDlg, IDC_IMIPT, (LPTSTR)input, (int)sizeof(input));
+            SetDlgItemText(hDlg, IDC_IMTXT, (LPCTSTR)input);
+            //EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+        }
+        break;
+    }
+    return (INT_PTR)FALSE;
+}
+
+
+// メニュー 描画内容出力
+INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    HGLOBAL hg;
+    CHAR *strMem;
+    static LPCWSTR output[256] = {0x00};// 入力内容保存用の変数
+    static UINT dataSize = 0;
+
+    UNREFERENCED_PARAMETER(lParam);
+    switch (message)
+    {
+    case WM_INITDIALOG:
+        // 出力文字列を設定する
+        GetGraphData(&graph, output, 256);
+
+        dataSize = lstrlen(output);
+
+        SetDlgItemText(hDlg, IDC_EXTXT1, output);
+        dataSize = lstrlen(output);
+        return (INT_PTR)TRUE;
+    case WM_COMMAND:
+        switch (LOWORD(wParam))
+        {
+        case IDCANCEL:
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+        case IDC_EXBTN:
+        {
+            // 文字列のコピー
+            if (!OpenClipboard(hDlg)) {
+                SetDlgItemText(hDlg, IDC_EXTXT2, TEXT("クリップボードを開くことができません"));
+                return (INT_PTR)FALSE;
+            }
+
+            EmptyClipboard();
+            hg = GlobalAlloc(GHND | GMEM_SHARE, dataSize * 2 + 1);
+            if (!hg)return (INT_PTR)FALSE;
+            strMem = (CHAR *)GlobalLock(hg);
+            lstrcpy(strMem, output);
+            GlobalUnlock(hg);
+            SetClipboardData(CF_UNICODETEXT, hg);
+            CloseClipboard();
+            SetDlgItemText(hDlg, IDC_EXTXT2, TEXT("クリップボードにコピーしました"));
+            //SetDlgItemText(hDlg, IDC_EXTXT2, strMem);
+            //EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+        }
+        }
+        break;
+    }
+    return (INT_PTR)FALSE;
+}
+
 // バージョン情報ボックスのメッセージ ハンドラーです。
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    UNREFERENCED_PARAMETER(lParam);
+    UNREFERENCED_PARAMETER(lParam);// 未使用時エラーの抑制
     switch (message)
     {
     case WM_INITDIALOG:
@@ -342,8 +431,8 @@ LPDWORD ColorAt(UINT x, UINT y, UINT width, UINT height)
 {
     //if ((x - width / 2) * (x - width / 2) + (y - height / 2) * (y - height / 2) < 50)return 0x00ff0000;
     int t = Calc(x, y, width, height);
-    if (t < 0) return 0x00ffffff;
-    return (t * 255 / graph.limit) * 0x00000100;
+    if (t < 0) return (LPDWORD)0x00ffffff;
+    return (LPDWORD)((t * 255 / graph.limit) * 0x00000100);
     //return (x + y) % 0x01000000;
     //return (0x01000000 - 1) * (x + y) / (width + height);
 }
