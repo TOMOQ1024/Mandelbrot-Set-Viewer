@@ -7,6 +7,7 @@ typedef struct {
 	long double x0;
 	long double y0;
 	long double size;
+	long double scale;
 	UINT limit;
 } GRAPH;
 
@@ -34,3 +35,4 @@ void GetGraphData(GRAPH *g, LPCWSTR buf, size_t bufSize)
 {
 	swprintf(buf, bufSize, L"%Lf/%Lf/%Lf/%u", g->x0, g->y0, g->size, g->limit);
 }
+

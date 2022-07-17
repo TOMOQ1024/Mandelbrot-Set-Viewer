@@ -12,7 +12,7 @@
 HINSTANCE hInst;                                // 現在のインターフェイス
 WCHAR szTitle[MAX_LOADSTRING];                  // タイトル バーのテキスト
 WCHAR szWindowClass[MAX_LOADSTRING];            // メイン ウィンドウ クラス名
-GRAPH graph = { 0, 0, 4, 200 };
+GRAPH graph = { 0, 0, 4, 1.5, 200 };
 
 
 // このコード モジュールに含まれる関数の宣言を転送します:
@@ -26,6 +26,7 @@ INT_PTR CALLBACK    MenuSetColor(HWND, UINT, WPARAM, LPARAM);
 //INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 LPDWORD             ColorAt(UINT, UINT, UINT, UINT);
 int                 Calc(UINT, UINT, UINT, UINT);
+void SetBmp(HWND, BITMAPINFO*, LPDWORD, UINT, UINT);
 
 int APIENTRY wWinMain(
     _In_ HINSTANCE hInstance,
@@ -181,31 +182,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         bmpInfo.bmiHeader.biPlanes = 1;
         bmpInfo.bmiHeader.biBitCount = 32;
         bmpInfo.bmiHeader.biCompression = BI_RGB;
+        SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+        break;
     }
     case WM_SIZE:
     {
-        if (message == WM_SIZE) {
-            mlen = min(width, height);
-            width = LOWORD(lParam);
-            height = HIWORD(lParam);
-        }
+        mlen = min(width, height);
+        width = LOWORD(lParam);
+        height = HIWORD(lParam);
+        SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+        break;
     }
     case WM_LBUTTONDOWN:
     {
-        if (message == WM_LBUTTONDOWN) {
-            graph.x0 += (mx - (long double)width / 2) / mlen * graph.size;
-            graph.y0 -= (my - (long double)height / 2) / mlen * graph.size;
-            graph.size *= 0.5;
-        }
-        bmpInfo.bmiHeader.biWidth = width;
-        bmpInfo.bmiHeader.biHeight = height;
-        // 裏画面への描画
-        for (y = 0; y < height; y++) {
-            for (x = 0; x < width; x++) {
-                lpPixel[x + y * width] = ColorAt(x, y, width, height);
-            }
-        }
-        InvalidateRect(hWnd, NULL, FALSE);
+        graph.x0 += (mx - (long double)width / 2) / mlen * graph.size;
+        graph.y0 -= (my - (long double)height / 2) / mlen * graph.size;
+        //graph.size *= 0.5;
+        SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
         break;
         /*
         PAINTSTRUCT ps;//
@@ -272,6 +265,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         my = -100;
         m_in = FALSE;
         InvalidateRect(hWnd, NULL, FALSE);
+        break;
+    }
+    case WM_MOUSEWHEEL:
+    {
+        int k = /*GET_KEYSTATE_WPARAM(wParam) / */GET_WHEEL_DELTA_WPARAM(wParam);
+        long double sc = 0 < k ? graph.scale : 1 / graph.scale;
+        //graph.x0 = (graph.x0 + (sc - 1) * (graph.x0 + (mx - (long double)width / 2) / mlen * graph.size)) / sc;
+        graph.x0 += (sc - 1) * (mx - (long double)width / 2) / mlen * graph.size / sc;
+        graph.y0 -= (sc - 1) * (my - (long double)height / 2) / mlen * graph.size / sc;
+        //graph.y0 = (graph.y0 - (sc - 1) * (my - (long double)height / 2) / mlen * graph.size) / sc;
+        graph.size /= sc;
+        SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
         break;
     }
     case WM_MOUSEMOVE:
@@ -486,4 +491,18 @@ int Calc(UINT x, UINT y, UINT width, UINT height)
         zr = tmp;
     }
     return -1;
+}
+
+void SetBmp(HWND hWnd, BITMAPINFO* bmpInfo, LPDWORD lpPixel, UINT width, UINT height)
+{
+    UINT x, y;
+    bmpInfo->bmiHeader.biWidth = width;
+    bmpInfo->bmiHeader.biHeight = height;
+    // 裏画面への描画
+    for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+            lpPixel[x + y * width] = ColorAt(x, y, width, height);
+        }
+    }
+    InvalidateRect(hWnd, NULL, FALSE);
 }
