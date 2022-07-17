@@ -14,13 +14,27 @@
 #define IDC_IMIPT   				5002//
 #define IDC_IMBTN   				5003//
 #define IDC_IMTXT   				5004//
+
 #define IDM_EXPORT   				5100//
 #define IDD_EXBOX   				5101//
 #define IDC_EXTXT1   				5102//
 #define IDC_EXBTN   				5103//
 #define IDC_EXTXT2   				5104//
+
 #define IDM_SAVE   					5200//
+
 #define IDM_SETCOLOR   				5300//
+#define IDD_SCBOX   				5301//
+#define IDC_SCSTATIC   				5302//
+#define IDC_SCEDIT1   				5303//
+#define IDC_SCCHECK   				5304//
+#define IDC_SCRADIO1   				5305//
+#define IDC_SCRADIO2   				5306//
+#define IDC_SCRADIO3   				5307//
+#define IDC_SCSLIDER   				5308//
+#define IDC_SCBUTTONOK   			5309//
+#define IDC_SCBUTTONCANCEL   		5310//
+
 #define IDI_PUREC			107
 #define IDI_SMALL				108
 #define IDC_PUREC			109

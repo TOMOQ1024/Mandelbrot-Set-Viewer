@@ -22,7 +22,8 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    MenuImport(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    MenuExport(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    MenuSetColor(HWND, UINT, WPARAM, LPARAM);
+//INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 LPDWORD             ColorAt(UINT, UINT, UINT, UINT);
 int                 Calc(UINT, UINT, UINT, UINT);
 
@@ -142,7 +143,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 
-//d
+//
 //  関数: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
 //  目的: メイン ウィンドウのメッセージを処理します。
@@ -299,13 +300,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DestroyWindow(hWnd);
             break;
         case IDM_IMPORT:
+            // MEMO
+            // DialogBox : モーダルダイアログ
+            // CreateDialog : モードレスダイアログ
             DialogBox(hInst, MAKEINTRESOURCE(IDD_IMBOX), hWnd, MenuImport);
             break;
         case IDM_EXPORT:
             DialogBox(hInst, MAKEINTRESOURCE(IDD_EXBOX), hWnd, MenuExport);
             break;
-        case IDM_ABOUT:
-            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+        case IDM_SETCOLOR:
+            DialogBox(hInst, MAKEINTRESOURCE(IDD_SCBOX), hWnd, MenuSetColor);
             break;
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
@@ -405,6 +409,35 @@ INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
     return (INT_PTR)FALSE;
 }
 
+
+// メニュー 配色の設定
+INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+
+    UNREFERENCED_PARAMETER(lParam);
+    switch (message)
+    {
+    case WM_INITDIALOG:
+        return (INT_PTR)TRUE;
+
+    case WM_COMMAND:
+        switch (LOWORD(wParam))
+        {
+        case IDCANCEL:
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+            /*
+        case IDC_SCSTATIC:
+            return (INT_PTR)TRUE;
+            */
+        }
+        break;
+    }
+    return (INT_PTR)FALSE;
+}
+
+/*
+
 // バージョン情報ボックスのメッセージ ハンドラーです。
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -425,6 +458,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
+*/
 
 // 色を返す
 LPDWORD ColorAt(UINT x, UINT y, UINT width, UINT height)
