@@ -3,6 +3,7 @@
 
 #include "framework.h"
 #include "Pure_C.h"
+#include <omp.h>
 
 #define MAX_LOADSTRING 100
 
@@ -12,7 +13,7 @@
 HINSTANCE hInst;                                // 現在のインターフェイス
 WCHAR szTitle[MAX_LOADSTRING];                  // タイトル バーのテキスト
 WCHAR szWindowClass[MAX_LOADSTRING];            // メイン ウィンドウ クラス名
-GRAPH graph = { 0, 0, 4, 1.5, 200 };
+GRAPH graph = { 0, 0, 4, 1.5, 500 };
 
 
 // このコード モジュールに含まれる関数の宣言を転送します:
@@ -168,7 +169,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     BOOL m_in = FALSE;
     UINT mlen = min(width, height);
 
-
+    
     switch (message)
     {
     case WM_CREATE:
@@ -195,8 +196,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     case WM_LBUTTONDOWN:
     {
-        graph.x0 += (mx - (long double)width / 2) / mlen * graph.size;
-        graph.y0 -= (my - (long double)height / 2) / mlen * graph.size;
+        graph.x0 += (mx - (double)width / 2) / mlen * graph.size;
+        graph.y0 -= (my - (double)height / 2) / mlen * graph.size;
         //graph.size *= 0.5;
         SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
         break;
@@ -242,7 +243,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         // 表画面へ転送
         SetDIBitsToDevice(hdc, 0, 0, width, height, 0, 0, 0, height, lpPixel, &bmpInfo, DIB_RGB_COLORS);
         StretchDIBits(hdc, 0, 0, width, height, 0, 0, width, height, lpPixel, &bmpInfo, DIB_RGB_COLORS, SRCCOPY);
-        //TCHAR str[128];
+        TCHAR str[128];
         //wsprintf(str, L"width: %d, height: %d", width, height);
         //TextOut(hdc, 10, 10, str, lstrlen(str));
         //wsprintf(str, L"mouseX: %d, mouseY: %d", mx, my);
@@ -270,11 +271,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_MOUSEWHEEL:
     {
         int k = /*GET_KEYSTATE_WPARAM(wParam) / */GET_WHEEL_DELTA_WPARAM(wParam);
-        long double sc = 0 < k ? graph.scale : 1 / graph.scale;
-        //graph.x0 = (graph.x0 + (sc - 1) * (graph.x0 + (mx - (long double)width / 2) / mlen * graph.size)) / sc;
-        graph.x0 += (sc - 1) * (mx - (long double)width / 2) / mlen * graph.size / sc;
-        graph.y0 -= (sc - 1) * (my - (long double)height / 2) / mlen * graph.size / sc;
-        //graph.y0 = (graph.y0 - (sc - 1) * (my - (long double)height / 2) / mlen * graph.size) / sc;
+        double sc = 0 < k ? graph.scale : 1 / graph.scale;
+        //graph.x0 = (graph.x0 + (sc - 1) * (graph.x0 + (mx - (double)width / 2) / mlen * graph.size)) / sc;
+        graph.x0 += (sc - 1) * (mx - (double)width / 2) / mlen * graph.size / sc;
+        graph.y0 -= (sc - 1) * (my - (double)height / 2) / mlen * graph.size / sc;
+        //graph.y0 = (graph.y0 - (sc - 1) * (my - (double)height / 2) / mlen * graph.size) / sc;
         graph.size /= sc;
         SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
         break;
@@ -331,7 +332,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-// メニュー 描画内容入力
+// メニュー 描画内容インポート
 INT_PTR CALLBACK MenuImport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     TCHAR input[1024];// 入力内容保存用の変数
@@ -351,6 +352,7 @@ INT_PTR CALLBACK MenuImport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
         case IDC_IMBTN:
             // 入力の決定
             GetDlgItemText(hDlg, IDC_IMIPT, (LPTSTR)input, (int)sizeof(input));
+            lstrcat(input, TEXT("(インポート機能は未実装です)"));
             SetDlgItemText(hDlg, IDC_IMTXT, (LPCTSTR)input);
             //EndDialog(hDlg, LOWORD(wParam));
             return (INT_PTR)TRUE;
@@ -361,7 +363,7 @@ INT_PTR CALLBACK MenuImport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 }
 
 
-// メニュー 描画内容出力
+// メニュー 描画内容エクスポート
 INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     HGLOBAL hg;
@@ -418,13 +420,65 @@ INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 // メニュー 配色の設定
 INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-
     UNREFERENCED_PARAMETER(lParam);
     switch (message)
     {
     case WM_INITDIALOG:
+        //SetWindowPos(hDlg, NULL, 0, 0, 166*2, 110*2, (SWP_NOZORDER | SWP_NOOWNERZORDER));
         return (INT_PTR)TRUE;
+    case WM_PAINT:
+    {
+        /*
+        PAINTSTRUCT ps;//
+        HDC hdc = BeginPaint(hDlg, &ps);
+        SelectObject(hdc, GetStockObject(GRAY_BRUSH));
+        SetBkColor(hdc, RGB(255, 128, 0));
+        //RECT rect = { 10, 10, 30, 30 };
+        //FillRect(hdc, &rect, CreateSolidBrush(RGB(255, 255, 0)));
+        SelectObject(hdc, (HPEN)CreatePen(PS_INSIDEFRAME, 2, RGB(0x00, 0x00, 0x00)));
+        SelectObject(hdc, (HBRUSH)CreateSolidBrush(RGB(0xFF, 0x99, 0x00)));
+        Rectangle(
+            hdc,
+            10 * GetDialogBaseUnits(),
+            10 * GetDialogBaseUnits(),
+            34 * GetDialogBaseUnits(),
+            34 * GetDialogBaseUnits()
+            // 21, 26, 43, 48
+        );
 
+        SetBkColor(hdc, RGB(0xFF, 0x99, 0x00));
+        SetTextAlign(hdc, TA_CENTER | TA_BASELINE);
+        RECT rect1 = { 21, 25, 43, 47 };
+        TextOut(hdc, (rect1.left + rect1.right) / 2, (rect1.top + rect1.bottom) / 2 + 8, TEXT("1"), 1);
+
+        SelectObject(hdc, (HBRUSH)CreateSolidBrush(RGB(0xFF, 0x00, 0x99)));
+        Rectangle(hdc, 21, 26+37*2, 43, 48+37*2);
+
+        SetBkColor(hdc, RGB(0xFF, 0x00, 0x99));
+        SetTextAlign(hdc, TA_CENTER | TA_BASELINE);
+        RECT rect2 = { 21, 25 + 37 * 2, 43, 47 + 37 * 2 };
+        TextOut(hdc, (rect2.left + rect2.right) / 2, (rect2.top + rect2.bottom) / 2 + 8, TEXT("2"), 1);
+        EndPaint(hDlg, &ps);
+        */
+        break;
+    }
+    case WM_CTLCOLORSTATIC:
+    {
+        LONG i =  GetWindowLong((HWND)lParam, GWL_ID);
+        if (i == IDC_SCINDEX0) {
+            //SetTextColor((HDC)wParam, RGB(0xFF, 0x00, 0x00));
+            //SetBkColor((HDC)wParam, GetSysColor(COLOR_3DFACE));
+            SetBkColor((HDC)wParam, RGB(0xFF, 0x00, 0x00));
+            return (BOOL)GetStockObject(NULL_BRUSH);
+        }
+        if (i == IDC_SCINDEX1) {
+            //SetTextColor((HDC)wParam, RGB(0xFF, 0x00, 0x00));
+            //SetBkColor((HDC)wParam, GetSysColor(COLOR_3DFACE));
+            SetBkColor((HDC)wParam, RGB(0x00, 0xFF, 0x00));
+            return (BOOL)GetStockObject(NULL_BRUSH);
+        }
+        //return (LRESULT)GetStockObject(WHITE_BRUSH);
+    }
     case WM_COMMAND:
         switch (LOWORD(wParam))
         {
@@ -481,9 +535,10 @@ int Calc(UINT x, UINT y, UINT width, UINT height)
 {
     UINT m = min(width, height);
     int i;
-    long double zr = 0, zi = 0, tmp;
-    long double cr = graph.x0 + (x - (long double)width / 2) / m * graph.size;
-    long double ci = graph.y0 + (y - (long double)height / 2) / m * graph.size;
+    double zr, zi, tmp, cr, ci;
+    zr = zi = 0;
+    cr = graph.x0 + (x - (double)width / 2) / m * graph.size;
+    ci = graph.y0 + (y - (double)height / 2) / m * graph.size;
     for (i = 0; i < graph.limit; i++) {
         if (zr * zr + zi * zi > 4) return i;
         tmp = zr * zr - zi * zi + cr;
@@ -493,16 +548,19 @@ int Calc(UINT x, UINT y, UINT width, UINT height)
     return -1;
 }
 
+// ビットマップを再設定して画面全体を無効化する
 void SetBmp(HWND hWnd, BITMAPINFO* bmpInfo, LPDWORD lpPixel, UINT width, UINT height)
 {
-    UINT x, y;
+    int x, y;
     bmpInfo->bmiHeader.biWidth = width;
     bmpInfo->bmiHeader.biHeight = height;
     // 裏画面への描画
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x++) {
+    #pragma omp parallel for private(x)
+    for (y = 0; y < (int)height; y++) {
+        for (x = 0; x < (int)width; x++) {
             lpPixel[x + y * width] = ColorAt(x, y, width, height);
         }
     }
     InvalidateRect(hWnd, NULL, FALSE);
 }
+

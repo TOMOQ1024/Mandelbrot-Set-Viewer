@@ -26,14 +26,15 @@
 #define IDM_SETCOLOR   				5300//
 #define IDD_SCBOX   				5301//
 #define IDC_SCSTATIC   				5302//
-#define IDC_SCEDIT1   				5303//
-#define IDC_SCCHECK   				5304//
-#define IDC_SCRADIO1   				5305//
-#define IDC_SCRADIO2   				5306//
-#define IDC_SCRADIO3   				5307//
-#define IDC_SCSLIDER   				5308//
-#define IDC_SCBUTTONOK   			5309//
-#define IDC_SCBUTTONCANCEL   		5310//
+#define IDC_SCINDEX0   				5303//
+#define IDC_SCINDEX1   				5304//
+#define IDC_SCCCODE0   				5305//
+#define IDC_SCCCODE1   				5306//
+#define IDC_SCBUTTON0   			5307//
+#define IDC_SCBUTTON1   			5308//
+#define IDC_SCSLIDER   				5309//
+#define IDC_SCBUTTONOK   			5310//
+#define IDC_SCBUTTONCANCEL   		5311//
 
 #define IDI_PUREC			107
 #define IDI_SMALL				108

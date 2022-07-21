@@ -4,10 +4,10 @@
 #include <wchar.h>
 
 typedef struct {
-	long double x0;
-	long double y0;
-	long double size;
-	long double scale;
+	double x0;
+	double y0;
+	double size;
+	double scale;
 	UINT limit;
 } GRAPH;
 
