@@ -11,6 +11,36 @@ typedef struct {
 	UINT limit;
 } GRAPH;
 
+
+// https://bluefish.orz.hm/sdoc/winprog_memo.html#%E3%82%AD%E3%83%AC%E3%82%A4%E3%81%AA%E3%82%AB%E3%83%A9%E3%83%BC%E3%83%86%E3%83%BC%E3%83%96%E3%83%AB%E3%82%92%E4%BD%9C%E3%82%8B
+COLORREF HSV(double h, double s, double v)
+{
+	double i, f, p, q, t;
+
+	if (s == 0)return RGB(v * 255, v * 255, v * 255);
+
+	h *= 6;
+	i = (int)h;
+	f = h - i;
+	p = v * (1 - s);
+	q = v * (1 - (s * f));
+	t = v * (1 - (s * (1 - f)));
+
+	if (i < 1)
+		return RGB(v * 255, t * 255, p * 255);
+	else if (i < 2)
+		return RGB(q * 255, v * 255, p * 255);
+	else if (i < 3)
+		return RGB(p * 255, v * 255, t * 255);
+	else if (i < 4)
+		return RGB(p * 255, q * 255, v * 255);
+	else if (i < 5)
+		return RGB(t * 255, p * 255, v * 255);
+	else
+		return RGB(v * 255, p * 255, q * 255);
+}
+
+
 /*
 void SetGraphData(GRAPH *g, LPCWSTR input)
 {

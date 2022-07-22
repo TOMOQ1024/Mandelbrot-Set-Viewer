@@ -14,6 +14,7 @@ HINSTANCE hInst;                                // 現在のインターフェ�
 WCHAR szTitle[MAX_LOADSTRING];                  // タイトル バーのテキスト
 WCHAR szWindowClass[MAX_LOADSTRING];            // メイン ウィンドウ クラス名
 GRAPH graph = { 0, 0, 4, 1.5, 500 };
+//GRAPH graph = { 0, 0, 40, 1.5, 500 };
 
 
 // このコード モジュールに含まれる関数の宣言を転送します:
@@ -525,6 +526,8 @@ LPDWORD ColorAt(UINT x, UINT y, UINT width, UINT height)
     //if ((x - width / 2) * (x - width / 2) + (y - height / 2) * (y - height / 2) < 50)return 0x00ff0000;
     int t = Calc(x, y, width, height);
     if (t < 0) return (LPDWORD)0x00ffffff;
+    //return (LPDWORD)((t * 4 % 128 + 64) * 0x00010100);
+    //return (LPDWORD)HSV(t%128/128.0, 0.7, 1.0);
     return (LPDWORD)((t * 255 / graph.limit) * 0x00000100);
     //return (x + y) % 0x01000000;
     //return (0x01000000 - 1) * (x + y) / (width + height);
