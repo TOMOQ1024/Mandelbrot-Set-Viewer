@@ -1,8 +1,9 @@
 ﻿// Pure_C.c : アプリケーションのエントリ ポイントを定義します。
 //
 
-#include "framework.h"
-#include "Pure_C.h"
+#include "Graph.h"
+#include "Color.h"
+#include "Menus.h"
 #include <omp.h>
 
 #define MAX_LOADSTRING 100
@@ -13,22 +14,15 @@
 HINSTANCE hInst;                                // 現在のインターフェイス
 WCHAR szTitle[MAX_LOADSTRING];                  // タイトル バーのテキスト
 WCHAR szWindowClass[MAX_LOADSTRING];            // メイン ウィンドウ クラス名
-GRAPH graph = { 0, 0, 4, 1.5, 500 };
-//GRAPH graph = { 0, 0, 40, 1.5, 500 };
+
+// グラフ構造体
+extern struct GRAPH graph;
 
 
 // このコード モジュールに含まれる関数の宣言を転送します:
-
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK    MenuImport(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK    MenuExport(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK    MenuSetColor(HWND, UINT, WPARAM, LPARAM);
-//INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-LPDWORD             ColorAt(UINT, UINT, UINT, UINT);
-int                 Calc(UINT, UINT, UINT, UINT);
-void SetBmp(HWND, BITMAPINFO*, LPDWORD, UINT, UINT);
 
 int APIENTRY wWinMain(
     _In_ HINSTANCE hInstance,
@@ -40,11 +34,12 @@ int APIENTRY wWinMain(
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    // TODO: ここにコードを挿入してください。
+    // graphの初期化
+    InitGraph();
 
     // グローバル文字列を初期化する
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-    LoadStringW(hInstance, IDC_PUREC, szWindowClass, MAX_LOADSTRING);
+    LoadStringW(hInstance, IDC_MANDELBROTSET, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
     // アプリケーション初期化の実行:
@@ -57,7 +52,7 @@ int APIENTRY wWinMain(
     // アクセラレータテーブル :
     //     特別なキーの組み合わせと発生させるIDを組み合わせたもの
     //     メニューの操作に用いる
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_PUREC));
+    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MANDELBROTSET));
 
     MSG msg;
 
@@ -77,11 +72,7 @@ int APIENTRY wWinMain(
 
 
 
-//
-//  関数: MyRegisterClass()
-//
-//  目的: ウィンドウ クラスを登録します。
-//
+// ウィンドウ クラスの登録
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     // ウィンドウクラスのパラメータ
@@ -94,10 +85,10 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.cbClsExtra     = 0;// ウィンドウクラス構造体の後ろに割り当てる補足バイト数
     wcex.cbWndExtra     = 0;// ウィンドウインスタンスの後ろに割り当てる補足バイト数
     wcex.hInstance      = hInstance;// このクラスのためのウィンドウプロシージャがあるインスタンスハンドル
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PUREC));// アイコンのハンドル
+    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MANDELBROTSET));// アイコンのハンドル
     wcex.hCursor        = LoadCursor(NULL, IDC_ARROW);// マウスカーソルのハンドル
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);// 背景描画用ブラシのハンドル
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_PUREC);// デフォルトメニュー名
+    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_MANDELBROTSET);// デフォルトメニュー名
     wcex.lpszClassName  = szWindowClass;// このウィンドウクラスにつける名前
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));// 16x16の小さいサイズのアイコン
 
@@ -165,7 +156,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     PAINTSTRUCT ps;
     static LPDWORD lpPixel;
     static BITMAPINFO bmpInfo;
-    UINT x, y;
     static int mx = -100, my = -100;
     BOOL m_in = FALSE;
     UINT mlen = min(width, height);
@@ -244,7 +234,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         // 表画面へ転送
         SetDIBitsToDevice(hdc, 0, 0, width, height, 0, 0, 0, height, lpPixel, &bmpInfo, DIB_RGB_COLORS);
         StretchDIBits(hdc, 0, 0, width, height, 0, 0, width, height, lpPixel, &bmpInfo, DIB_RGB_COLORS, SRCCOPY);
-        TCHAR str[128];
+        //TCHAR str[128];
         //wsprintf(str, L"width: %d, height: %d", width, height);
         //TextOut(hdc, 10, 10, str, lstrlen(str));
         //wsprintf(str, L"mouseX: %d, mouseY: %d", mx, my);
@@ -333,237 +323,5 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-// メニュー 描画内容インポート
-INT_PTR CALLBACK MenuImport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    TCHAR input[1024];// 入力内容保存用の変数
 
-    UNREFERENCED_PARAMETER(lParam);
-    switch (message)
-    {
-    case WM_INITDIALOG:
-        return (INT_PTR)TRUE;
-
-    case WM_COMMAND:
-        switch (LOWORD(wParam))
-        {
-        case IDCANCEL:
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        case IDC_IMBTN:
-            // 入力の決定
-            GetDlgItemText(hDlg, IDC_IMIPT, (LPTSTR)input, (int)sizeof(input));
-            lstrcat(input, TEXT("(インポート機能は未実装です)"));
-            SetDlgItemText(hDlg, IDC_IMTXT, (LPCTSTR)input);
-            //EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        }
-        break;
-    }
-    return (INT_PTR)FALSE;
-}
-
-
-// メニュー 描画内容エクスポート
-INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    HGLOBAL hg;
-    CHAR *strMem;
-    static LPCWSTR output[256] = {0x00};// 入力内容保存用の変数
-    static UINT dataSize = 0;
-
-    UNREFERENCED_PARAMETER(lParam);
-    switch (message)
-    {
-    case WM_INITDIALOG:
-        // 出力文字列を設定する
-        GetGraphData(&graph, output, 256);
-
-        dataSize = lstrlen(output);
-
-        SetDlgItemText(hDlg, IDC_EXTXT1, output);
-        dataSize = lstrlen(output);
-        return (INT_PTR)TRUE;
-    case WM_COMMAND:
-        switch (LOWORD(wParam))
-        {
-        case IDCANCEL:
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        case IDC_EXBTN:
-        {
-            // 文字列のコピー
-            if (!OpenClipboard(hDlg)) {
-                SetDlgItemText(hDlg, IDC_EXTXT2, TEXT("クリップボードを開くことができません"));
-                return (INT_PTR)FALSE;
-            }
-
-            EmptyClipboard();
-            hg = GlobalAlloc(GHND | GMEM_SHARE, dataSize * 2 + 1);
-            if (!hg)return (INT_PTR)FALSE;
-            strMem = (CHAR *)GlobalLock(hg);
-            lstrcpy(strMem, output);
-            GlobalUnlock(hg);
-            SetClipboardData(CF_UNICODETEXT, hg);
-            CloseClipboard();
-            SetDlgItemText(hDlg, IDC_EXTXT2, TEXT("クリップボードにコピーしました"));
-            //SetDlgItemText(hDlg, IDC_EXTXT2, strMem);
-            //EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        }
-        }
-        break;
-    }
-    return (INT_PTR)FALSE;
-}
-
-
-// メニュー 配色の設定
-INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    UNREFERENCED_PARAMETER(lParam);
-    switch (message)
-    {
-    case WM_INITDIALOG:
-        //SetWindowPos(hDlg, NULL, 0, 0, 166*2, 110*2, (SWP_NOZORDER | SWP_NOOWNERZORDER));
-        return (INT_PTR)TRUE;
-    case WM_PAINT:
-    {
-        /*
-        PAINTSTRUCT ps;//
-        HDC hdc = BeginPaint(hDlg, &ps);
-        SelectObject(hdc, GetStockObject(GRAY_BRUSH));
-        SetBkColor(hdc, RGB(255, 128, 0));
-        //RECT rect = { 10, 10, 30, 30 };
-        //FillRect(hdc, &rect, CreateSolidBrush(RGB(255, 255, 0)));
-        SelectObject(hdc, (HPEN)CreatePen(PS_INSIDEFRAME, 2, RGB(0x00, 0x00, 0x00)));
-        SelectObject(hdc, (HBRUSH)CreateSolidBrush(RGB(0xFF, 0x99, 0x00)));
-        Rectangle(
-            hdc,
-            10 * GetDialogBaseUnits(),
-            10 * GetDialogBaseUnits(),
-            34 * GetDialogBaseUnits(),
-            34 * GetDialogBaseUnits()
-            // 21, 26, 43, 48
-        );
-
-        SetBkColor(hdc, RGB(0xFF, 0x99, 0x00));
-        SetTextAlign(hdc, TA_CENTER | TA_BASELINE);
-        RECT rect1 = { 21, 25, 43, 47 };
-        TextOut(hdc, (rect1.left + rect1.right) / 2, (rect1.top + rect1.bottom) / 2 + 8, TEXT("1"), 1);
-
-        SelectObject(hdc, (HBRUSH)CreateSolidBrush(RGB(0xFF, 0x00, 0x99)));
-        Rectangle(hdc, 21, 26+37*2, 43, 48+37*2);
-
-        SetBkColor(hdc, RGB(0xFF, 0x00, 0x99));
-        SetTextAlign(hdc, TA_CENTER | TA_BASELINE);
-        RECT rect2 = { 21, 25 + 37 * 2, 43, 47 + 37 * 2 };
-        TextOut(hdc, (rect2.left + rect2.right) / 2, (rect2.top + rect2.bottom) / 2 + 8, TEXT("2"), 1);
-        EndPaint(hDlg, &ps);
-        */
-        break;
-    }
-    case WM_CTLCOLORSTATIC:
-    {
-        LONG i =  GetWindowLong((HWND)lParam, GWL_ID);
-        if (i == IDC_SCINDEX0) {
-            //SetTextColor((HDC)wParam, RGB(0xFF, 0x00, 0x00));
-            //SetBkColor((HDC)wParam, GetSysColor(COLOR_3DFACE));
-            SetBkColor((HDC)wParam, RGB(0xFF, 0x00, 0x00));
-            return (BOOL)GetStockObject(NULL_BRUSH);
-        }
-        if (i == IDC_SCINDEX1) {
-            //SetTextColor((HDC)wParam, RGB(0xFF, 0x00, 0x00));
-            //SetBkColor((HDC)wParam, GetSysColor(COLOR_3DFACE));
-            SetBkColor((HDC)wParam, RGB(0x00, 0xFF, 0x00));
-            return (BOOL)GetStockObject(NULL_BRUSH);
-        }
-        //return (LRESULT)GetStockObject(WHITE_BRUSH);
-    }
-    case WM_COMMAND:
-        switch (LOWORD(wParam))
-        {
-        case IDCANCEL:
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-            /*
-        case IDC_SCSTATIC:
-            return (INT_PTR)TRUE;
-            */
-        }
-        break;
-    }
-    return (INT_PTR)FALSE;
-}
-
-/*
-
-// バージョン情報ボックスのメッセージ ハンドラーです。
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    UNREFERENCED_PARAMETER(lParam);// 未使用時エラーの抑制
-    switch (message)
-    {
-    case WM_INITDIALOG:
-        return (INT_PTR)TRUE;
-
-    case WM_COMMAND:
-        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-        {
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        }
-        break;
-    }
-    return (INT_PTR)FALSE;
-}
-
-*/
-
-// 色を返す
-LPDWORD ColorAt(UINT x, UINT y, UINT width, UINT height)
-{
-    //if ((x - width / 2) * (x - width / 2) + (y - height / 2) * (y - height / 2) < 50)return 0x00ff0000;
-    int t = Calc(x, y, width, height);
-    if (t < 0) return (LPDWORD)0x00ffffff;
-    //return (LPDWORD)((t * 4 % 128 + 64) * 0x00010100);
-    //return (LPDWORD)HSV(t%128/128.0, 0.7, 1.0);
-    return (LPDWORD)((t * 255 / graph.limit) * 0x00000100);
-    //return (x + y) % 0x01000000;
-    //return (0x01000000 - 1) * (x + y) / (width + height);
-}
-
-// 計算回数を返す
-int Calc(UINT x, UINT y, UINT width, UINT height)
-{
-    UINT m = min(width, height);
-    int i;
-    double zr, zi, tmp, cr, ci;
-    zr = zi = 0;
-    cr = graph.x0 + (x - (double)width / 2) / m * graph.size;
-    ci = graph.y0 + (y - (double)height / 2) / m * graph.size;
-    for (i = 0; i < graph.limit; i++) {
-        if (zr * zr + zi * zi > 4) return i;
-        tmp = zr * zr - zi * zi + cr;
-        zi = 2 * zr * zi + ci;
-        zr = tmp;
-    }
-    return -1;
-}
-
-// ビットマップを再設定して画面全体を無効化する
-void SetBmp(HWND hWnd, BITMAPINFO* bmpInfo, LPDWORD lpPixel, UINT width, UINT height)
-{
-    int x, y;
-    bmpInfo->bmiHeader.biWidth = width;
-    bmpInfo->bmiHeader.biHeight = height;
-    // 裏画面への描画
-    #pragma omp parallel for private(x)
-    for (y = 0; y < (int)height; y++) {
-        for (x = 0; x < (int)width; x++) {
-            lpPixel[x + y * width] = ColorAt(x, y, width, height);
-        }
-    }
-    InvalidateRect(hWnd, NULL, FALSE);
-}
 

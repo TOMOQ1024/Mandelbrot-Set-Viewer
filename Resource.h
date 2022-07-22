@@ -5,7 +5,7 @@
 #define IDS_APP_TITLE			103
 
 #define IDR_MAINFRAME			128
-#define IDD_PUREC_DIALOG	102
+#define IDD_MS_DIALOG	102
 #define IDD_ABOUTBOX			103
 #define IDM_ABOUT				104
 #define IDM_EXIT				105
@@ -36,9 +36,9 @@
 #define IDC_SCBUTTONOK   			5310//
 #define IDC_SCBUTTONCANCEL   		5311//
 
-#define IDI_PUREC			107
+#define IDI_MANDELBROTSET			107
 #define IDI_SMALL				108
-#define IDC_PUREC			109
+#define IDC_MANDELBROTSET			109
 #define IDC_MYICON				2
 #ifndef IDC_STATIC
 #define IDC_STATIC				-1

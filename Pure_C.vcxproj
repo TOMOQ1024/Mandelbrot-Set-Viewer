@@ -129,20 +129,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Color.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="Pure_C.h" />
+    <ClInclude Include="Graph.h" />
+    <ClInclude Include="Menus.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Pure_C.c" />
+    <ClCompile Include="Color.c" />
+    <ClCompile Include="Graph.c" />
+    <ClCompile Include="Menus.c" />
+    <ClCompile Include="Main.c" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Pure_C.rc" />
+    <ResourceCompile Include="Resource.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Pure_C.ico" />
-    <Image Include="small.ico" />
+    <Image Include="Mandelbrot Set.ico" />
+    <Image Include="Mandelbrot Set small.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
