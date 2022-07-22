@@ -6,14 +6,17 @@ This is a Mandelbrot Set viewer with WINAPI.
 
 You can explore the famous Mandelbrot Set 
 
-<!--
 # Features
+
+//////////////////////
 
 # Depends
 
+//////////////////////
+
 # Build
 
--->
+//////////////////////
 
 # Usage
 
