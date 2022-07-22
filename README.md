@@ -31,3 +31,7 @@ If you notice a slowdown, try reducing the window size.
 
 * tomoq
 * Twitter : [@TOMOQ8192](https://twitter.com/TOMOQ8192)
+
+# LICENSE
+
+This application is released under the MIT License, see [LICENSE](/LICENSE).
