@@ -9,6 +9,10 @@ void InitGraph(void)
 	graph.size = 4;
 	graph.scale = 1.5;
 	graph.limit = 500;
+	graph.color_mode = 0;
+	graph.color0 = 0x00FFFFFF;
+	graph.color1 = 0x00000000;
+	graph.color2 = 0x0000FF00;
 }
 
 /*

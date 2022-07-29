@@ -3,6 +3,11 @@
 
 extern struct GRAPH graph;
 
+COLORREF InvertColor(COLORREF color)
+{
+    return RGB(GetBValue(color), GetGValue(color), GetRValue(color));
+}
+
 // https://bluefish.orz.hm/sdoc/winprog_memo.html#%E3%82%AD%E3%83%AC%E3%82%A4%E3%81%AA%E3%82%AB%E3%83%A9%E3%83%BC%E3%83%86%E3%83%BC%E3%83%96%E3%83%AB%E3%82%92%E4%BD%9C%E3%82%8B
 COLORREF HSV(double h, double s, double v)
 {
@@ -35,7 +40,7 @@ DWORD ColorAt(UINT x, UINT y, UINT width, UINT height)
 {
     //if ((x - width / 2) * (x - width / 2) + (y - height / 2) * (y - height / 2) < 50)return 0x00ff0000;
     int t = Calc(x, y, width, height);
-    if (t < 0) return (DWORD)0x00ffffff;
+    if (t < 0) return (DWORD)graph.color0;
     //return (DWORD)((t * 4 % 128 + 64) * 0x00010100);
     //return (DWORD)HSV(t%128/128.0, 0.7, 1.0);
     return (DWORD)((t * 255 / graph.limit) * 0x00000100);

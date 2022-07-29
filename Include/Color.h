@@ -3,6 +3,9 @@
 #include "framework.h"
 #include "resource.h"
 
+// RGB <=> BGR
+COLORREF InvertColor(COLORREF color);
+
 // HSVÇ©ÇÁCOLORREFílÇ…ïœä∑Ç∑ÇÈä÷êî
 COLORREF HSV(double h, double s, double v);
 
