@@ -97,7 +97,12 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 {
     static CHOOSECOLOR cc = { 0 };
     static COLORREF color = 0, CustColors[16];
-    TCHAR ccode0[8], ccode1[8];
+    TCHAR ccode[8];
+
+    HBRUSH hBrush, hOldBrush;
+    HWND hCtrl;
+    HDC hdc;
+    RECT rc;
 
 
     UNREFERENCED_PARAMETER(lParam);
@@ -114,17 +119,51 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     case WM_CTLCOLORSTATIC:
     {
         LONG i = GetWindowLong((HWND)lParam, GWL_ID);
-        if (i == IDC_SCINDEX0) {
+        if (i == IDC_SCDISPLAY0) {
             SetBkColor((HDC)wParam, InvertColor(graph.color0));
-            wsprintf(ccode0, L"#%02x%02x%02x", GetBValue(graph.color0), GetGValue(graph.color0), GetRValue(graph.color0));
-            SetDlgItemText(hDlg, IDC_SCCCODE0, (LPCTSTR)ccode0);
+            wsprintf(ccode, L"#%02x%02x%02x", GetBValue(graph.color0), GetGValue(graph.color0), GetRValue(graph.color0));
+            SetDlgItemText(hDlg, IDC_SCCCODE0, (LPCTSTR)ccode);
             return (INT_PTR)GetStockObject(NULL_BRUSH);
         }
-        if (i == IDC_SCINDEX1) {
-            SetBkColor((HDC)wParam, InvertColor(graph.color1));
-            wsprintf(ccode1, L"#%02x%02x%02x", GetBValue(graph.color1), GetGValue(graph.color1), GetRValue(graph.color1));
-            SetDlgItemText(hDlg, IDC_SCCCODE1, (LPCTSTR)ccode1);
+        if (i >= IDC_SCDISPLAY1 && i <= IDC_SCDISPLAY4) {
             return (INT_PTR)GetStockObject(NULL_BRUSH);
+        }
+        if (i == IDC_SCDISPLAY5) {
+            SetBkColor((HDC)wParam, InvertColor(graph.color1));
+            wsprintf(ccode, L"#%02x%02x%02x", GetBValue(graph.color1), GetGValue(graph.color1), GetRValue(graph.color1));
+            SetDlgItemText(hDlg, IDC_SCCCODE1, (LPCTSTR)ccode);
+            return (INT_PTR)GetStockObject(NULL_BRUSH);
+        }
+        if (i == IDC_SCDISPLAY6) {
+            SetBkColor((HDC)wParam, InvertColor(graph.color2));
+            wsprintf(ccode, L"#%02x%02x%02x", GetBValue(graph.color2), GetGValue(graph.color2), GetRValue(graph.color2));
+            SetDlgItemText(hDlg, IDC_SCCCODE2, (LPCTSTR)ccode);
+            return (INT_PTR)GetStockObject(NULL_BRUSH);
+        }
+        break;
+    }
+    case WM_PAINT:
+    {
+        for (int j = 0; j < 4; j++) {
+            hCtrl = GetDlgItem(hDlg, IDC_SCDISPLAY1 + j);
+            GetWindowRect(hCtrl, &rc);
+            hdc = GetDC(hCtrl);
+            SelectObject(hdc, GetStockObject(NULL_PEN));
+            hBrush = CreateSolidBrush(RGB(255, 0, 0));
+            hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+            for (int i = 0; i < rc.right - rc.left; i++) {
+                DeleteObject(
+                    SelectObject(hdc, hBrush = CreateSolidBrush(
+                        j==3
+                        ? Grad(graph.color1, graph.color2, 1.0 * i / (rc.right - rc.left))
+                        : HSV(1.0 * i / (rc.right - rc.left), 1 - j / 4.0, 1)
+                    ))
+                );
+                Rectangle(hdc, i, 0, i + 2, rc.bottom - rc.top);
+            }
+            SelectObject(hdc, hOldBrush);
+            DeleteObject(hBrush);
+            ReleaseDC(hCtrl, hdc);
         }
         break;
     }

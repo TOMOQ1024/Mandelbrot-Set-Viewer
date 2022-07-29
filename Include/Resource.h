@@ -2,13 +2,13 @@
 // Microsoft Visual C++ で生成されたインクルード ファイルです。
 // 次で使用: Pure_C.rc
 
-#define IDS_APP_TITLE			103
+#define IDS_APP_TITLE				103
 
-#define IDR_MAINFRAME			128
-#define IDD_MS_DIALOG	102
-#define IDD_ABOUTBOX			103
-#define IDM_ABOUT				104
-#define IDM_EXIT				105
+#define IDR_MAINFRAME				128
+#define IDD_MS_DIALOG				102
+#define IDD_ABOUTBOX				103
+#define IDM_ABOUT					104
+#define IDM_EXIT					105
 #define IDM_IMPORT   				5000//
 #define IDD_IMBOX   				5001//
 #define IDC_IMIPT   				5002//
@@ -25,22 +25,38 @@
 
 #define IDM_SETCOLOR   				5300//
 #define IDD_SCBOX   				5301//
-#define IDC_SCSTATIC   				5302//
-#define IDC_SCINDEX0   				5303//
-#define IDC_SCINDEX1   				5304//
-#define IDC_SCINDEX2   				5305//
-#define IDC_SCCCODE0   				5306//
-#define IDC_SCCCODE1   				5307//
-#define IDC_SCCCODE2   				5308//
-#define IDC_SCBUTTON0   			5309//
-#define IDC_SCBUTTON1   			5310//
-#define IDC_SCSLIDER   				5311//
-#define IDC_SCBUTTONOK   			5312//
-#define IDC_SCBUTTONCANCEL   		5313//
+#define IDC_SCGROUP0   				5302//
+#define IDC_SCGROUP1   				5303//
+#define IDC_SCSTATIC0   			5304//
+#define IDC_SCSTATIC1   			5305//
+#define IDC_SCSTATIC2   			5306//
+#define IDC_SCTVALUE0   			5307//
+#define IDC_SCTVALUE1   			5308//
+#define IDC_SCDISPLAY0   			5309//
+#define IDC_SCDISPLAY1 				5310//
+#define IDC_SCDISPLAY2   			5311//
+#define IDC_SCDISPLAY3   			5312//
+#define IDC_SCDISPLAY4   			5313//
+#define IDC_SCDISPLAY5   			5314//
+#define IDC_SCDISPLAY6   			5315//
+#define IDC_SCRADIO1   				5316//
+#define IDC_SCRADIO2   				5317//
+#define IDC_SCRADIO3   				5318//
+#define IDC_SCRADIO4   				5319//
+#define IDC_SCCCODE0   				5320//
+#define IDC_SCCCODE1   				5321//
+#define IDC_SCCCODE2   				5322//
+#define IDC_SCBUTTON0   			5323//
+#define IDC_SCBUTTON1   			5324//
+#define IDC_SCSLIDER0   			5325//
+#define IDC_SCSLIDER1   			5326//
+#define IDC_SCBUTTONOK   			5327//
+#define IDC_SCBUTTONCANCEL   		5328//
 
 #define IDI_MANDELBROTSET			107
-#define IDI_SMALL				108
+#define IDI_SMALL					108
 #define IDC_MANDELBROTSET			109
+#define IDB_DUMMYBITMAP				110
 #define IDC_MYICON				2
 #ifndef IDC_STATIC
 #define IDC_STATIC				-1

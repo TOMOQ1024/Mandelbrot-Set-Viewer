@@ -36,6 +36,15 @@ COLORREF HSV(double h, double s, double v)
         return RGB(v * 255, p * 255, q * 255);
 }
 
+COLORREF Grad(COLORREF c0, COLORREF c1, double t)
+{
+    return RGB(
+        GetRValue(c0) * (1 - t) + GetRValue(c1) * t,
+        GetGValue(c0) * (1 - t) + GetGValue(c1) * t,
+        GetBValue(c0) * (1 - t) + GetBValue(c1) * t
+    );
+}
+
 DWORD ColorAt(UINT x, UINT y, UINT width, UINT height)
 {
     //if ((x - width / 2) * (x - width / 2) + (y - height / 2) * (y - height / 2) < 50)return 0x00ff0000;
