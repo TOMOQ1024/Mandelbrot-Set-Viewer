@@ -9,6 +9,12 @@ struct GRAPH{
 	double size;
 	double scale;
 	UINT limit;
+	int color_mode;
+	COLORREF color0;// Žû‘©•”
+	COLORREF color1;// ”­ŽU•”1
+	COLORREF color2;// ”­ŽU•”2
+	double color_clip0;
+	double color_clip1;
 } graph;
 
 void InitGraph(void);

@@ -2,12 +2,19 @@
 
 #include "Menus.h"
 #include "Graph.h"
+#include "Color.h"
+//#include <ColorDlg.h>
+#include <commdlg.h>
+#include <CommCtrl.h>
+
+#pragma once
+#pragma comment(lib, "ComCtl32.lib")
 
 
 // メニュー 描画内容インポート
 INT_PTR CALLBACK MenuImport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    TCHAR input[1024];// 入力内容保存用の変数
+    TCHAR input[1024] = {0};// 入力内容保存用の変数
 
     UNREFERENCED_PARAMETER(lParam);
     switch (message)
@@ -92,75 +99,140 @@ INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 // メニュー 配色の設定
 INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    // コモンコントロールの初期化
+    InitCommonControls();
+
+    static CHOOSECOLOR cc[3] = {{0}};
+    static COLORREF CustColors[3][16];
+    TCHAR ccode[8];
+
+    HBRUSH hBrush, hOldBrush;
+    HWND hCtrl;
+    HDC hdc;
+    RECT rc;
+
+
     UNREFERENCED_PARAMETER(lParam);
     switch (message)
     {
     case WM_INITDIALOG:
-        //SetWindowPos(hDlg, NULL, 0, 0, 166*2, 110*2, (SWP_NOZORDER | SWP_NOOWNERZORDER));
-        return (INT_PTR)TRUE;
-    case WM_PAINT:
     {
-        /*
-        PAINTSTRUCT ps;//
-        HDC hdc = BeginPaint(hDlg, &ps);
-        SelectObject(hdc, GetStockObject(GRAY_BRUSH));
-        SetBkColor(hdc, RGB(255, 128, 0));
-        //RECT rect = { 10, 10, 30, 30 };
-        //FillRect(hdc, &rect, CreateSolidBrush(RGB(255, 255, 0)));
-        SelectObject(hdc, (HPEN)CreatePen(PS_INSIDEFRAME, 2, RGB(0x00, 0x00, 0x00)));
-        SelectObject(hdc, (HBRUSH)CreateSolidBrush(RGB(0xFF, 0x99, 0x00)));
-        Rectangle(
-            hdc,
-            10 * GetDialogBaseUnits(),
-            10 * GetDialogBaseUnits(),
-            34 * GetDialogBaseUnits(),
-            34 * GetDialogBaseUnits()
-            // 21, 26, 43, 48
-        );
+        //SetWindowPos(hDlg, NULL, 0, 0, 166*2, 110*2, (SWP_NOZORDER | SWP_NOOWNERZORDER));
+        for (int i = 0; i < 3; i++) {
+            cc[i].lStructSize = sizeof(CHOOSECOLOR);
+            cc[i].hwndOwner = hDlg;
+            cc[i].lpCustColors = CustColors[i];
+            cc[i].Flags = CC_FULLOPEN | CC_RGBINIT;
+        }
+        cc[0].rgbResult = InvertColor(graph.color0);
+        cc[1].rgbResult = InvertColor(graph.color1);
+        cc[2].rgbResult = InvertColor(graph.color2);
 
-        SetBkColor(hdc, RGB(0xFF, 0x99, 0x00));
-        SetTextAlign(hdc, TA_CENTER | TA_BASELINE);
-        RECT rect1 = { 21, 25, 43, 47 };
-        TextOut(hdc, (rect1.left + rect1.right) / 2, (rect1.top + rect1.bottom) / 2 + 8, TEXT("1"), 1);
-
-        SelectObject(hdc, (HBRUSH)CreateSolidBrush(RGB(0xFF, 0x00, 0x99)));
-        Rectangle(hdc, 21, 26+37*2, 43, 48+37*2);
-
-        SetBkColor(hdc, RGB(0xFF, 0x00, 0x99));
-        SetTextAlign(hdc, TA_CENTER | TA_BASELINE);
-        RECT rect2 = { 21, 25 + 37 * 2, 43, 47 + 37 * 2 };
-        TextOut(hdc, (rect2.left + rect2.right) / 2, (rect2.top + rect2.bottom) / 2 + 8, TEXT("2"), 1);
-        EndPaint(hDlg, &ps);
-        */
+        HWND hRadio = GetDlgItem(hDlg, IDC_SCRADIO1 + graph.color_mode);
+        SendMessage(hRadio, BM_SETCHECK, 1, 0);
+        SendDlgItemMessage(hDlg, IDC_SCSLIDER0, TBM_SETPOS, TRUE, (LPARAM)(graph.color_clip0 * 100));
+        SendDlgItemMessage(hDlg, IDC_SCSLIDER1, TBM_SETPOS, TRUE, (LPARAM)(graph.color_clip1 * 100));
         break;
     }
     case WM_CTLCOLORSTATIC:
     {
         LONG i = GetWindowLong((HWND)lParam, GWL_ID);
-        if (i == IDC_SCINDEX0) {
-            //SetTextColor((HDC)wParam, RGB(0xFF, 0x00, 0x00));
-            //SetBkColor((HDC)wParam, GetSysColor(COLOR_3DFACE));
-            SetBkColor((HDC)wParam, RGB(0xFF, 0x00, 0x00));
+        if (i == IDC_SCDISPLAY0) {
+            SetBkColor((HDC)wParam, InvertColor(graph.color0));
+            wsprintf(ccode, L"#%02x%02x%02x", GetBValue(graph.color0), GetGValue(graph.color0), GetRValue(graph.color0));
+            SetDlgItemText(hDlg, IDC_SCCCODE0, (LPCTSTR)ccode);
             return (INT_PTR)GetStockObject(NULL_BRUSH);
         }
-        if (i == IDC_SCINDEX1) {
-            //SetTextColor((HDC)wParam, RGB(0xFF, 0x00, 0x00));
-            //SetBkColor((HDC)wParam, GetSysColor(COLOR_3DFACE));
-            SetBkColor((HDC)wParam, RGB(0x00, 0xFF, 0x00));
+        if (i >= IDC_SCDISPLAY1 && i <= IDC_SCDISPLAY4) {
             return (INT_PTR)GetStockObject(NULL_BRUSH);
         }
-        //return (LRESULT)GetStockObject(WHITE_BRUSH);
+        if (i == IDC_SCDISPLAY5) {
+            SetBkColor((HDC)wParam, InvertColor(graph.color1));
+            //wsprintf(ccode, L"#%02x%02x%02x", GetBValue(graph.color1), GetGValue(graph.color1), GetRValue(graph.color1));
+            //SetDlgItemText(hDlg, IDC_SCCCODE1, (LPCTSTR)ccode);
+            return (INT_PTR)GetStockObject(NULL_BRUSH);
+        }
+        if (i == IDC_SCDISPLAY6) {
+            SetBkColor((HDC)wParam, InvertColor(graph.color2));
+            //wsprintf(ccode, L"#%02x%02x%02x", GetBValue(graph.color2), GetGValue(graph.color2), GetRValue(graph.color2));
+            //SetDlgItemText(hDlg, IDC_SCCCODE2, (LPCTSTR)ccode);
+            return (INT_PTR)GetStockObject(NULL_BRUSH);
+        }
+        break;
+    }
+    case WM_PAINT:
+    {
+        for (int j = 0; j < 4; j++) {
+            hCtrl = GetDlgItem(hDlg, IDC_SCDISPLAY1 + j);
+            GetWindowRect(hCtrl, &rc);
+            hdc = GetDC(hCtrl);
+            SelectObject(hdc, GetStockObject(NULL_PEN));
+            hBrush = CreateSolidBrush(RGB(255, 0, 0));
+            hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+            for (int i = 0; i < rc.right - rc.left; i++) {
+                DeleteObject(
+                    SelectObject(hdc, hBrush = CreateSolidBrush(
+                        j == 3
+                        ? Grad(InvertColor(graph.color1), InvertColor(graph.color2), (1.0 * i / (rc.right - rc.left) - graph.color_clip0) / (graph.color_clip1 - graph.color_clip0))
+                        : HSV(1.0 * i / (rc.right - rc.left), 1 - j / 3.0, 1)
+                    ))
+                );
+                Rectangle(hdc, i, 0, i + 2, rc.bottom - rc.top);
+            }
+            SelectObject(hdc, hOldBrush);
+            DeleteObject(hBrush);
+            ReleaseDC(hCtrl, hdc);
+        }
+        break;
+    }
+    case WM_HSCROLL:
+    {
+        if ((HWND)lParam == GetDlgItem(hDlg, IDC_SCSLIDER0)) {
+            graph.color_clip0 = SendDlgItemMessage(hDlg,IDC_SCSLIDER0, TBM_GETPOS, 0, 0) / 100.0;
+        }
+        if ((HWND)lParam == GetDlgItem(hDlg, IDC_SCSLIDER1)) {
+            graph.color_clip1 = SendDlgItemMessage(hDlg, IDC_SCSLIDER1, TBM_GETPOS, 0, 0) / 100.0;
+        }
+        InvalidateRect(hDlg, NULL, FALSE);
+        break;
     }
     case WM_COMMAND:
         switch (LOWORD(wParam))
         {
+        case IDC_SCBUTTON0:
+            if (!ChooseColor(&cc[0]))return (INT_PTR)FALSE;
+            graph.color0 = InvertColor(cc[0].rgbResult);
+            InvalidateRect(hDlg, NULL, FALSE);
+            break;
+        case IDC_SCBUTTON1:
+            if (!ChooseColor(&cc[1]))return (INT_PTR)FALSE;
+            graph.color1 = InvertColor(cc[1].rgbResult);
+            InvalidateRect(hDlg, NULL, FALSE);
+            break;
+        case IDC_SCBUTTON2:
+            if (!ChooseColor(&cc[2]))return (INT_PTR)FALSE;
+            graph.color2 = InvertColor(cc[2].rgbResult);
+            InvalidateRect(hDlg, NULL, FALSE);
+            break;
+
+        case IDC_SCRADIO1:
+        case IDC_SCRADIO2:
+        case IDC_SCRADIO3:
+        case IDC_SCRADIO4:
+        {
+            graph.color_mode = LOWORD(wParam) - IDC_SCRADIO1;
+            break;
+        }
+
+        case IDC_SCBUTTONOK:
+            EndDialog(hDlg, IDOK);
+            return (INT_PTR)TRUE;
+        case IDC_SCBUTTONCANCEL:
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
         case IDCANCEL:
             EndDialog(hDlg, LOWORD(wParam));
             return (INT_PTR)TRUE;
-            /*
-        case IDC_SCSTATIC:
-            return (INT_PTR)TRUE;
-            */
         }
         break;
     }

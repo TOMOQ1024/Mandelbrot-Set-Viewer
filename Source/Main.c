@@ -306,7 +306,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DialogBox(hInst, MAKEINTRESOURCE(IDD_EXBOX), hWnd, MenuExport);
             break;
         case IDM_SETCOLOR:
-            DialogBox(hInst, MAKEINTRESOURCE(IDD_SCBOX), hWnd, MenuSetColor);
+            if (DialogBox(hInst, MAKEINTRESOURCE(IDD_SCBOX), hWnd, MenuSetColor) == IDOK) {
+                SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+                InvalidateRect(hWnd, NULL, FALSE);
+            }
             break;
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);

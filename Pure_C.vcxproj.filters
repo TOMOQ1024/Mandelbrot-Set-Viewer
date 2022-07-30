@@ -35,6 +35,9 @@
     <Image Include="Resource\Mandelbrot Set.ico">
       <Filter>リソース ファイル</Filter>
     </Image>
+    <Image Include="Resource\dummy.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource\Resource.rc">
