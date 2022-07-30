@@ -13,7 +13,8 @@ void InitGraph(void)
 	graph.color0 = 0x00FFFFFF;
 	graph.color1 = 0x00000000;
 	graph.color2 = 0x0000FF00;
-	graph.reDraw = FALSE;
+	graph.color_clip0 = 0;
+	graph.color_clip1 = 1;
 }
 
 /*

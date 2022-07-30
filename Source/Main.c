@@ -307,7 +307,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case IDM_SETCOLOR:
             if (DialogBox(hInst, MAKEINTRESOURCE(IDD_SCBOX), hWnd, MenuSetColor) == IDOK) {
-                //graph.reDraw = FALSE;
                 SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
                 InvalidateRect(hWnd, NULL, FALSE);
             }

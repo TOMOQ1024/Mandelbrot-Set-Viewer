@@ -5,12 +5,16 @@
 #include "Color.h"
 //#include <ColorDlg.h>
 #include <commdlg.h>
+#include <CommCtrl.h>
+
+#pragma once
+#pragma comment(lib, "ComCtl32.lib")
 
 
 // メニュー 描画内容インポート
 INT_PTR CALLBACK MenuImport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    TCHAR input[1024];// 入力内容保存用の変数
+    TCHAR input[1024] = {0};// 入力内容保存用の変数
 
     UNREFERENCED_PARAMETER(lParam);
     switch (message)
@@ -95,6 +99,9 @@ INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 // メニュー 配色の設定
 INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    // コモンコントロールの初期化
+    InitCommonControls();
+
     static CHOOSECOLOR cc[3] = {{0}};
     static COLORREF CustColors[3][16];
     TCHAR ccode[8];
@@ -109,6 +116,7 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     switch (message)
     {
     case WM_INITDIALOG:
+    {
         //SetWindowPos(hDlg, NULL, 0, 0, 166*2, 110*2, (SWP_NOZORDER | SWP_NOOWNERZORDER));
         for (int i = 0; i < 3; i++) {
             cc[i].lStructSize = sizeof(CHOOSECOLOR);
@@ -122,7 +130,10 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 
         HWND hRadio = GetDlgItem(hDlg, IDC_SCRADIO1 + graph.color_mode);
         SendMessage(hRadio, BM_SETCHECK, 1, 0);
+        SendDlgItemMessage(hDlg, IDC_SCSLIDER0, TBM_SETPOS, TRUE, (LPARAM)(graph.color_clip0 * 100));
+        SendDlgItemMessage(hDlg, IDC_SCSLIDER1, TBM_SETPOS, TRUE, (LPARAM)(graph.color_clip1 * 100));
         break;
+    }
     case WM_CTLCOLORSTATIC:
     {
         LONG i = GetWindowLong((HWND)lParam, GWL_ID);
@@ -161,8 +172,8 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
             for (int i = 0; i < rc.right - rc.left; i++) {
                 DeleteObject(
                     SelectObject(hdc, hBrush = CreateSolidBrush(
-                        j==3
-                        ? Grad(InvertColor(graph.color1), InvertColor(graph.color2), 1.0 * i / (rc.right - rc.left))
+                        j == 3
+                        ? Grad(InvertColor(graph.color1), InvertColor(graph.color2), (1.0 * i / (rc.right - rc.left) - graph.color_clip0) / (graph.color_clip1 - graph.color_clip0))
                         : HSV(1.0 * i / (rc.right - rc.left), 1 - j / 3.0, 1)
                     ))
                 );
@@ -172,6 +183,17 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
             DeleteObject(hBrush);
             ReleaseDC(hCtrl, hdc);
         }
+        break;
+    }
+    case WM_HSCROLL:
+    {
+        if ((HWND)lParam == GetDlgItem(hDlg, IDC_SCSLIDER0)) {
+            graph.color_clip0 = SendDlgItemMessage(hDlg,IDC_SCSLIDER0, TBM_GETPOS, 0, 0) / 100.0;
+        }
+        if ((HWND)lParam == GetDlgItem(hDlg, IDC_SCSLIDER1)) {
+            graph.color_clip1 = SendDlgItemMessage(hDlg, IDC_SCSLIDER1, TBM_GETPOS, 0, 0) / 100.0;
+        }
+        InvalidateRect(hDlg, NULL, FALSE);
         break;
     }
     case WM_COMMAND:

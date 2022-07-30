@@ -41,6 +41,8 @@ COLORREF HSV(double h, double s, double v)
 
 COLORREF Grad(COLORREF c0, COLORREF c1, double t)
 {
+    if (t < 0)return c0;
+    if (1 < t)return c1;
     return RGB(
         GetRValue(c0) * (1 - t) + GetRValue(c1) * t,
         GetGValue(c0) * (1 - t) + GetGValue(c1) * t,
@@ -58,7 +60,7 @@ DWORD ColorAt(UINT x, UINT y, UINT width, UINT height)
     switch (graph.color_mode)
     {
     case 3:
-        return (DWORD)Grad(graph.color1, graph.color2, 1.0 * t / graph.limit);
+        return (DWORD)Grad(graph.color1, graph.color2, (1.0 * t / graph.limit - graph.color_clip0) / (graph.color_clip1 - graph.color_clip0));
     default:
         return (DWORD)HSV(t / 40.0, 1 - graph.color_mode / 3.0, 1);
     }
