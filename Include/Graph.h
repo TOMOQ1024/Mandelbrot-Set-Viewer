@@ -13,6 +13,7 @@ struct GRAPH{
 	COLORREF color0;// Žû‘©•”
 	COLORREF color1;// ”­ŽU•”1
 	COLORREF color2;// ”­ŽU•”2
+	BOOL reDraw;
 } graph;
 
 void InitGraph(void);

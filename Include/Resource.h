@@ -30,8 +30,8 @@
 #define IDC_SCSTATIC0   			5304//
 #define IDC_SCSTATIC1   			5305//
 #define IDC_SCSTATIC2   			5306//
-#define IDC_SCTVALUE0   			5307//
-#define IDC_SCTVALUE1   			5308//
+//#define IDC_SCTVALUE0   			5307//
+//#define IDC_SCTVALUE1   			5308//
 #define IDC_SCDISPLAY0   			5309//
 #define IDC_SCDISPLAY1 				5310//
 #define IDC_SCDISPLAY2   			5311//
@@ -44,14 +44,15 @@
 #define IDC_SCRADIO3   				5318//
 #define IDC_SCRADIO4   				5319//
 #define IDC_SCCCODE0   				5320//
-#define IDC_SCCCODE1   				5321//
-#define IDC_SCCCODE2   				5322//
+//#define IDC_SCCCODE1   				5321//
+//#define IDC_SCCCODE2   				5322//
 #define IDC_SCBUTTON0   			5323//
 #define IDC_SCBUTTON1   			5324//
-#define IDC_SCSLIDER0   			5325//
-#define IDC_SCSLIDER1   			5326//
-#define IDC_SCBUTTONOK   			5327//
-#define IDC_SCBUTTONCANCEL   		5328//
+#define IDC_SCBUTTON2   			5325//
+#define IDC_SCSLIDER0   			5326//
+#define IDC_SCSLIDER1   			5327//
+#define IDC_SCBUTTONOK   			5328//
+#define IDC_SCBUTTONCANCEL   		5329//
 
 #define IDI_MANDELBROTSET			107
 #define IDI_SMALL					108

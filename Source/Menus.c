@@ -95,8 +95,8 @@ INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 // メニュー 配色の設定
 INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    static CHOOSECOLOR cc = { 0 };
-    static COLORREF color = 0, CustColors[16];
+    static CHOOSECOLOR cc[3] = {{0}};
+    static COLORREF CustColors[3][16];
     TCHAR ccode[8];
 
     HBRUSH hBrush, hOldBrush;
@@ -110,11 +110,18 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     {
     case WM_INITDIALOG:
         //SetWindowPos(hDlg, NULL, 0, 0, 166*2, 110*2, (SWP_NOZORDER | SWP_NOOWNERZORDER));
-        cc.lStructSize = sizeof(CHOOSECOLOR);
-        cc.hwndOwner = hDlg;
-        cc.rgbResult = graph.color0;
-        cc.lpCustColors = CustColors;
-        cc.Flags = CC_FULLOPEN | CC_RGBINIT;
+        for (int i = 0; i < 3; i++) {
+            cc[i].lStructSize = sizeof(CHOOSECOLOR);
+            cc[i].hwndOwner = hDlg;
+            cc[i].lpCustColors = CustColors[i];
+            cc[i].Flags = CC_FULLOPEN | CC_RGBINIT;
+        }
+        cc[0].rgbResult = InvertColor(graph.color0);
+        cc[1].rgbResult = InvertColor(graph.color1);
+        cc[2].rgbResult = InvertColor(graph.color2);
+
+        HWND hRadio = GetDlgItem(hDlg, IDC_SCRADIO1 + graph.color_mode);
+        SendMessage(hRadio, BM_SETCHECK, 1, 0);
         break;
     case WM_CTLCOLORSTATIC:
     {
@@ -130,14 +137,14 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
         }
         if (i == IDC_SCDISPLAY5) {
             SetBkColor((HDC)wParam, InvertColor(graph.color1));
-            wsprintf(ccode, L"#%02x%02x%02x", GetBValue(graph.color1), GetGValue(graph.color1), GetRValue(graph.color1));
-            SetDlgItemText(hDlg, IDC_SCCCODE1, (LPCTSTR)ccode);
+            //wsprintf(ccode, L"#%02x%02x%02x", GetBValue(graph.color1), GetGValue(graph.color1), GetRValue(graph.color1));
+            //SetDlgItemText(hDlg, IDC_SCCCODE1, (LPCTSTR)ccode);
             return (INT_PTR)GetStockObject(NULL_BRUSH);
         }
         if (i == IDC_SCDISPLAY6) {
             SetBkColor((HDC)wParam, InvertColor(graph.color2));
-            wsprintf(ccode, L"#%02x%02x%02x", GetBValue(graph.color2), GetGValue(graph.color2), GetRValue(graph.color2));
-            SetDlgItemText(hDlg, IDC_SCCCODE2, (LPCTSTR)ccode);
+            //wsprintf(ccode, L"#%02x%02x%02x", GetBValue(graph.color2), GetGValue(graph.color2), GetRValue(graph.color2));
+            //SetDlgItemText(hDlg, IDC_SCCCODE2, (LPCTSTR)ccode);
             return (INT_PTR)GetStockObject(NULL_BRUSH);
         }
         break;
@@ -155,8 +162,8 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
                 DeleteObject(
                     SelectObject(hdc, hBrush = CreateSolidBrush(
                         j==3
-                        ? Grad(graph.color1, graph.color2, 1.0 * i / (rc.right - rc.left))
-                        : HSV(1.0 * i / (rc.right - rc.left), 1 - j / 4.0, 1)
+                        ? Grad(InvertColor(graph.color1), InvertColor(graph.color2), 1.0 * i / (rc.right - rc.left))
+                        : HSV(1.0 * i / (rc.right - rc.left), 1 - j / 3.0, 1)
                     ))
                 );
                 Rectangle(hdc, i, 0, i + 2, rc.bottom - rc.top);
@@ -171,14 +178,30 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
         switch (LOWORD(wParam))
         {
         case IDC_SCBUTTON0:
-        {
-            if (!ChooseColor(&cc))return (INT_PTR)FALSE;
-            graph.color0 = InvertColor(cc.rgbResult);
-            //SetClassLong(hDlg, GCLP_HBRBACKGROUND,
-            //    (LONG)CreateSolidBrush(cc.rgbResult));
+            if (!ChooseColor(&cc[0]))return (INT_PTR)FALSE;
+            graph.color0 = InvertColor(cc[0].rgbResult);
             InvalidateRect(hDlg, NULL, FALSE);
             break;
+        case IDC_SCBUTTON1:
+            if (!ChooseColor(&cc[1]))return (INT_PTR)FALSE;
+            graph.color1 = InvertColor(cc[1].rgbResult);
+            InvalidateRect(hDlg, NULL, FALSE);
+            break;
+        case IDC_SCBUTTON2:
+            if (!ChooseColor(&cc[2]))return (INT_PTR)FALSE;
+            graph.color2 = InvertColor(cc[2].rgbResult);
+            InvalidateRect(hDlg, NULL, FALSE);
+            break;
+
+        case IDC_SCRADIO1:
+        case IDC_SCRADIO2:
+        case IDC_SCRADIO3:
+        case IDC_SCRADIO4:
+        {
+            graph.color_mode = LOWORD(wParam) - IDC_SCRADIO1;
+            break;
         }
+
         case IDC_SCBUTTONOK:
             EndDialog(hDlg, IDOK);
             return (INT_PTR)TRUE;

@@ -11,9 +11,12 @@ COLORREF InvertColor(COLORREF color)
 // https://bluefish.orz.hm/sdoc/winprog_memo.html#%E3%82%AD%E3%83%AC%E3%82%A4%E3%81%AA%E3%82%AB%E3%83%A9%E3%83%BC%E3%83%86%E3%83%BC%E3%83%96%E3%83%AB%E3%82%92%E4%BD%9C%E3%82%8B
 COLORREF HSV(double h, double s, double v)
 {
+    if (h < 0)return 0;
     double i, f, p, q, t;
 
     if (s == 0)return RGB(v * 255, v * 255, v * 255);
+
+    while (1 <= h)h -= 1;
 
     h *= 6;
     i = (int)h;
@@ -52,7 +55,13 @@ DWORD ColorAt(UINT x, UINT y, UINT width, UINT height)
     if (t < 0) return (DWORD)graph.color0;
     //return (DWORD)((t * 4 % 128 + 64) * 0x00010100);
     //return (DWORD)HSV(t%128/128.0, 0.7, 1.0);
-    return (DWORD)((t * 255 / graph.limit) * 0x00000100);
+    switch (graph.color_mode)
+    {
+    case 3:
+        return (DWORD)Grad(graph.color1, graph.color2, 1.0 * t / graph.limit);
+    default:
+        return (DWORD)HSV(t / 40.0, 1 - graph.color_mode / 3.0, 1);
+    }
     //return (x + y) % 0x01000000;
     //return (0x01000000 - 1) * (x + y) / (width + height);
 }
