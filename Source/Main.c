@@ -311,6 +311,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 InvalidateRect(hWnd, NULL, FALSE);
             }
             break;
+        case IDM_SETLIMIT:
+            if (DialogBox(hInst, MAKEINTRESOURCE(IDD_SLBOX), hWnd, MenuSetLimit) == IDCANCEL) {
+                SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+                InvalidateRect(hWnd, NULL, FALSE);
+            }
+            break;
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
         }
