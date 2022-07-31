@@ -54,6 +54,14 @@
 #define IDC_SCBUTTONOK   			5328//
 #define IDC_SCBUTTONCANCEL   		5329//
 
+#define IDM_SETLIMIT   				5400//
+#define IDD_SLBOX   				5401//
+#define IDC_SLIPT   				5402//
+#define IDC_SLBTN   				5403//
+#define IDC_SLSTATIC   				5404//
+#define IDC_SLTXT0   				5405//
+#define IDC_SLTXT1   				5406//
+
 #define IDI_MANDELBROTSET			107
 #define IDI_SMALL					108
 #define IDC_MANDELBROTSET			109

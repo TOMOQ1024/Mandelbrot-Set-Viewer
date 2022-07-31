@@ -76,7 +76,7 @@ int Calc(UINT x, UINT y, UINT width, UINT height)
     zr = zi = 0;
     cr = graph.x0 + (x - (double)width / 2) / m * graph.size;
     ci = graph.y0 + (y - (double)height / 2) / m * graph.size;
-    for (i = 0; i < (int)graph.limit; i++) {
+    for (i = 0; i <= (int)graph.limit; i++) {
         if (zr * zr + zi * zi > 4) return i;
         tmp = zr * zr - zi * zi + cr;
         zi = 2 * zr * zi + ci;

@@ -239,6 +239,58 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     return (INT_PTR)FALSE;
 }
 
+
+
+// メニュー 描画内容インポート
+INT_PTR CALLBACK MenuSetLimit(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    static TCHAR input[1024] = { 0 };// 入力内容保存用の変数
+    static TCHAR output[1024] = { 0 };// 出力内容保存用の変数
+    static TCHAR warnings[] = { TEXT("入力値が適切ではありません") };
+    static INT flg = 0;
+
+    UNREFERENCED_PARAMETER(lParam);
+    switch (message)
+    {
+    case WM_INITDIALOG:
+        wsprintf(input, L"現在の最大計算回数：%d", graph.limit);
+        SetDlgItemText(hDlg, IDC_SLTXT1, (LPCTSTR)input);
+        return (INT_PTR)TRUE;
+
+    case WM_COMMAND:
+        switch (LOWORD(wParam))
+        {
+        case IDCANCEL:
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+        case IDC_SLBTN:
+            // 入力の決定
+            GetDlgItemText(hDlg, IDC_SLIPT, (LPTSTR)input, (int)sizeof(input));
+
+            flg = 0;
+            if (input[0] == '+')flg = 1;
+            else if (input[0] == '-')flg = -1;
+            for (int i = flg * flg; i < (int)sizeof(input) && input[i]; i++) {
+                if (!iswdigit(input[i])) {
+                    SetDlgItemText(hDlg, IDC_SLTXT0, (LPCTSTR)warnings);
+                    return (INT_PTR)FALSE;
+                }
+            }
+            
+            if (flg == -1)graph.limit -= _wtoi(&input[1]);
+            if (flg ==  0)graph.limit = _wtoi(input);
+            if (flg == +1)graph.limit += _wtoi(&input[1]);
+            wsprintf(input, L"現在の最大計算回数：%d", graph.limit);
+            SetDlgItemText(hDlg, IDC_SLTXT0, TEXT(""));
+            SetDlgItemText(hDlg, IDC_SLTXT1, (LPCTSTR)input);
+            return (INT_PTR)TRUE;
+        }
+        break;
+    }
+    return (INT_PTR)FALSE;
+}
+
+
 /*
 
 // バージョン情報ボックスのメッセージ ハンドラーです。
