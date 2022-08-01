@@ -18,11 +18,14 @@ struct GRAPH{
 	COLORREF color0;// 収束部
 	COLORREF color1;// 発散部1
 	COLORREF color2;// 発散部2
-	double color_clip0;
-	double color_clip1;
+	double color_stop0;
+	double color_stop1;
 } graph;
 
 void InitGraph(UINT);
+
+// 構造体のコピー
+void CopyGraph(struct GRAPH *gdest, struct GRAPH *gsrc);
 
 //void SetGraphData(GRAPH* g, LPCWSTR input);
 

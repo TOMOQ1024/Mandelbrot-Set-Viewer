@@ -13,14 +13,29 @@ void InitGraph(UINT flg)
 		graph.color0 = 0x00FFFFFF;
 		graph.color1 = 0x00000000;
 		graph.color2 = 0x0000FF00;
-		graph.color_clip0 = 0;
-		graph.color_clip1 = 1;
+		graph.color_stop0 = 0;
+		graph.color_stop1 = 1;
 	}
 	if (flg & GRAPH_INIT_OTHER) {
 		graph.scale = 1.5;
 		graph.limit = 500;
 		graph.color_mode = 3;// 3: カスタマイズ
 	}
+}
+
+void CopyGraph(struct GRAPH* gdest, struct GRAPH* gsrc)
+{
+	gdest->x0 = gsrc->x0;
+	gdest->y0 = gsrc->y0;
+	gdest->size = gsrc->size;
+	gdest->color0 = gsrc->color0;
+	gdest->color1 = gsrc->color1;
+	gdest->color2 = gsrc->color2;
+	gdest->color_stop0 = gsrc->color_stop0;
+	gdest->color_stop1 = gsrc->color_stop1;
+	gdest->scale = gsrc->scale;
+	gdest->limit = gsrc->limit;
+	gdest->color_mode = gsrc->color_mode;
 }
 
 /*
