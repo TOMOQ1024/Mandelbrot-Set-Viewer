@@ -33,7 +33,8 @@ INT_PTR CALLBACK MenuImport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
             GetDlgItemText(hDlg, IDC_IMIPT, (LPTSTR)input, (int)sizeof(input));
             lstrcat(input, TEXT("(インポート機能は未実装です)"));
             SetDlgItemText(hDlg, IDC_IMTXT, (LPCTSTR)input);
-            //EndDialog(hDlg, LOWORD(wParam));
+
+            SetGraphData(&graph, input);
             return (INT_PTR)TRUE;
         }
         break;
