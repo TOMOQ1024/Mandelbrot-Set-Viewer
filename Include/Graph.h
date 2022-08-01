@@ -3,6 +3,11 @@
 #include "framework.h"
 #include "resource.h"
 
+#define GRAPH_INIT_AREA		0x001
+#define GRAPH_INIT_COLOR	0x010
+#define GRAPH_INIT_OTHER	0x100
+#define GRAPH_INIT_ALL		0x111
+
 struct GRAPH{
 	double x0;
 	double y0;
@@ -17,7 +22,7 @@ struct GRAPH{
 	double color_clip1;
 } graph;
 
-void InitGraph(void);
+void InitGraph(UINT);
 
 //void SetGraphData(GRAPH* g, LPCWSTR input);
 

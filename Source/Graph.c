@@ -3,18 +3,24 @@
 
 extern struct GRAPH graph;
 
-void InitGraph(void)
+void InitGraph(UINT flg)
 {
-	graph.x0 = graph.y0 = 0;
-	graph.size = 4;
-	graph.scale = 1.5;
-	graph.limit = 500;
-	graph.color_mode = 3;// 3: カスタマイズ
-	graph.color0 = 0x00FFFFFF;
-	graph.color1 = 0x00000000;
-	graph.color2 = 0x0000FF00;
-	graph.color_clip0 = 0;
-	graph.color_clip1 = 1;
+	if (flg & GRAPH_INIT_AREA) {
+		graph.x0 = graph.y0 = 0;
+		graph.size = 4;
+	}
+	if (flg & GRAPH_INIT_COLOR) {
+		graph.color0 = 0x00FFFFFF;
+		graph.color1 = 0x00000000;
+		graph.color2 = 0x0000FF00;
+		graph.color_clip0 = 0;
+		graph.color_clip1 = 1;
+	}
+	if (flg & GRAPH_INIT_OTHER) {
+		graph.scale = 1.5;
+		graph.limit = 500;
+		graph.color_mode = 3;// 3: カスタマイズ
+	}
 }
 
 /*
