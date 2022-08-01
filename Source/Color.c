@@ -60,7 +60,7 @@ DWORD ColorAt(UINT x, UINT y, UINT width, UINT height)
     switch (graph.color_mode)
     {
     case 3:
-        return (DWORD)Grad(graph.color1, graph.color2, (1.0 * t / graph.limit - graph.color_clip0) / (graph.color_clip1 - graph.color_clip0));
+        return (DWORD)Grad(graph.color1, graph.color2, (1.0 * t / graph.limit - graph.color_stop0) / (graph.color_stop1 - graph.color_stop0));
     default:
         return (DWORD)HSV(t / 40.0, 1 - graph.color_mode / 3.0, 1);
     }
