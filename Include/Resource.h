@@ -62,6 +62,10 @@
 #define IDC_SLTXT0   				5405//
 #define IDC_SLTXT1   				5406//
 
+#define IDM_INITALL   				5500//
+#define IDM_INITAREA   				5510//
+#define IDM_INITCOLOR  				5520//
+
 #define IDI_MANDELBROTSET			107
 #define IDI_SMALL					108
 #define IDC_MANDELBROTSET			109

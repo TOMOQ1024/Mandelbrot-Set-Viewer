@@ -35,7 +35,7 @@ int APIENTRY wWinMain(
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // graphの初期化
-    InitGraph();
+    InitGraph(GRAPH_INIT_ALL);
 
     // グローバル文字列を初期化する
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -316,6 +316,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
                 InvalidateRect(hWnd, NULL, FALSE);
             }
+            break;
+        case IDM_INITALL:
+            InitGraph(GRAPH_INIT_ALL);
+            SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+            InvalidateRect(hWnd, NULL, FALSE);
+            break;
+        case IDM_INITAREA:
+            InitGraph(GRAPH_INIT_AREA);
+            SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+            InvalidateRect(hWnd, NULL, FALSE);
+            break;
+        case IDM_INITCOLOR:
+            InitGraph(GRAPH_INIT_COLOR);
+            SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+            InvalidateRect(hWnd, NULL, FALSE);
             break;
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
