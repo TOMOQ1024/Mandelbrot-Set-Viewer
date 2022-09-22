@@ -41,9 +41,9 @@ void CopyGraph(struct GRAPH* gdest, struct GRAPH* gsrc)
 void SetGraphData(struct GRAPH *gdest, LPCWSTR input)
 {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!フォーマットに適合する文字列か判定!!!!!!!!!!!!!!!!!!!!!!!
-	/*int i = 0, j = 0, k = 0;
+	int i = 0, j = 0, k = 0;
 	WCHAR data[4][30];
-	while (input[i+j]) {
+	while (input[i + j]) {
 		if (input[i + j] == L'/') {
 			k += 1;
 			j += i;
@@ -53,10 +53,11 @@ void SetGraphData(struct GRAPH *gdest, LPCWSTR input)
 			data[k][i] = input[i + j];
 			i += 1;
 		}
-	}*/
+	}
 
 	swscanf_s(
-		input, L"%Lf/%Lf/%Lf/%lu/%lu/%lu/%Lf/%Lf/%d/%Lf/%u",
+		input,
+		L"%Lf/%Lf/%Lf/%lu/%lu/%lu/%Lf/%Lf/%d/%Lf/%u",
 		&(gdest->x0), &(gdest->y0), &(gdest->size),
 		&(gdest->color0), &(gdest->color1), &(gdest->color2), &(gdest->color_stop0), &(gdest->color_stop1),
 		&(gdest->color_mode), &(gdest->scale), &(gdest->limit)

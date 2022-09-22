@@ -247,7 +247,7 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 }
 
 
-// メニュー 描画内容インポート
+// メニュー 最大計算回数設定
 INT_PTR CALLBACK MenuSetLimit(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static TCHAR input[1024] = { 0 };// 入力内容保存用の変数
