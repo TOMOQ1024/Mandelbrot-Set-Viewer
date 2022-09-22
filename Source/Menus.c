@@ -33,7 +33,8 @@ INT_PTR CALLBACK MenuImport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
             GetDlgItemText(hDlg, IDC_IMIPT, (LPTSTR)input, (int)sizeof(input));
             lstrcat(input, TEXT("(インポート機能は未実装です)"));
             SetDlgItemText(hDlg, IDC_IMTXT, (LPCTSTR)input);
-            //EndDialog(hDlg, LOWORD(wParam));
+
+            SetGraphData(&graph, input);
             return (INT_PTR)TRUE;
         }
         break;
@@ -246,7 +247,7 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 }
 
 
-// メニュー 描画内容インポート
+// メニュー 最大計算回数設定
 INT_PTR CALLBACK MenuSetLimit(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static TCHAR input[1024] = { 0 };// 入力内容保存用の変数

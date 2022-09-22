@@ -27,7 +27,7 @@ void InitGraph(UINT);
 // 構造体のコピー
 void CopyGraph(struct GRAPH *gdest, struct GRAPH *gsrc);
 
-//void SetGraphData(GRAPH* g, LPCWSTR input);
+void SetGraphData(struct GRAPH* gdest, LPCWSTR input);
 
 // 描画内容の出力
 void GetGraphData(LPWSTR buf, size_t bufSize);

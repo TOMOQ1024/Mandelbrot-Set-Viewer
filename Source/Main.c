@@ -239,6 +239,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         //TextOut(hdc, 10, 10, str, lstrlen(str));
         //wsprintf(str, L"mouseX: %d, mouseY: %d", mx, my);
         //TextOut(hdc, 10, 30, str, lstrlen(str));
+        //swprintf_s(str, sizeof(str)/sizeof(str[0]), TEXT("%25.20f"), 2.1);
+        //TextOut(hdc, 10, 50, str, lstrlen(str));
         if (m_in) {
             SelectObject(hdc, GetStockObject(WHITE_BRUSH));
             Rectangle(hdc, mx - 10, my - 10, mx + 10, my + 10);
@@ -297,10 +299,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DestroyWindow(hWnd);
             break;
         case IDM_IMPORT:
-            // MEMO
-            // DialogBox : モーダルダイアログ
-            // CreateDialog : モードレスダイアログ
-            DialogBox(hInst, MAKEINTRESOURCE(IDD_IMBOX), hWnd, MenuImport);
+            if (DialogBox(hInst, MAKEINTRESOURCE(IDD_IMBOX), hWnd, MenuImport)) {
+                SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+                InvalidateRect(hWnd, NULL, FALSE);
+            }
             break;
         case IDM_EXPORT:
             DialogBox(hInst, MAKEINTRESOURCE(IDD_EXBOX), hWnd, MenuExport);
