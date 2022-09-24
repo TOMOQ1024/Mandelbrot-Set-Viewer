@@ -14,7 +14,7 @@
 // メニュー 描画内容インポート
 INT_PTR CALLBACK MenuImport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    TCHAR input[1024] = {0};// 入力内容保存用の変数
+    TCHAR input[1024] = { 0 };// 入力内容保存用の変数
 
     UNREFERENCED_PARAMETER(lParam);
     switch (message)
@@ -27,15 +27,23 @@ INT_PTR CALLBACK MenuImport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
         {
         case IDCANCEL:
             EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
+            return (INT_PTR)IDCANCEL;
         case IDC_IMBTN:
             // 入力の決定
-            GetDlgItemText(hDlg, IDC_IMIPT, (LPTSTR)input, (int)sizeof(input));
-            lstrcat(input, TEXT("(インポート機能は未実装です)"));
+            GetDlgItemText(hDlg, IDC_IMIPT, (LPTSTR)input, sizeof(input) / sizeof(TCHAR));
+            //	&(gdest->x0), &(gdest->y0), &(gdest->size),
+            //	&(gdest->color0), &(gdest->color1), &(gdest->color2), &(gdest->color_stop0), &(gdest->color_stop1),
+            //	&(gdest->color_mode), /*&(gdest->scale), */&(gdest->limit)
+            if (SetGraphData(&graph, input)) {
+                swprintf(input, 1024, L"%f %f", graph.x0, graph.y0);
+                //swprintf(input, 1024, L"%06X %06X %06X", graph.color0, graph.color1, graph.color2);
+                //swprintf(input, 1024, L"%f %u", graph.scale, graph.limit);
+                //lstrcpy(input, TEXT("インポート成功"));
+            }
+            else {
+                lstrcpy(input, TEXT("インポート失敗"));
+            }
             SetDlgItemText(hDlg, IDC_IMTXT, (LPCTSTR)input);
-
-            SetGraphData(&graph, input);
-            return (INT_PTR)TRUE;
         }
         break;
     }
@@ -48,7 +56,7 @@ INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 {
     HGLOBAL hg;
     CHAR* strMem;
-    static WCHAR output[256] = { 0x00 };// 入力内容保存用の変数
+    static WCHAR output[1024] = { 0x00 };// 入力内容保存用の変数
     static UINT dataSize = 0;
 
     UNREFERENCED_PARAMETER(lParam);
@@ -56,7 +64,7 @@ INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
     {
     case WM_INITDIALOG:
         // 出力文字列を設定する
-        GetGraphData(output, 256);
+        GetGraphData(output, 1024);
 
         dataSize = lstrlen(output);
 

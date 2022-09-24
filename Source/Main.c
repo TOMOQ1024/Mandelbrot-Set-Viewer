@@ -299,7 +299,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DestroyWindow(hWnd);
             break;
         case IDM_IMPORT:
-            if (DialogBox(hInst, MAKEINTRESOURCE(IDD_IMBOX), hWnd, MenuImport)) {
+            if (DialogBox(hInst, MAKEINTRESOURCE(IDD_IMBOX), hWnd, MenuImport) == IDCANCEL) {
                 SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
                 InvalidateRect(hWnd, NULL, FALSE);
             }
