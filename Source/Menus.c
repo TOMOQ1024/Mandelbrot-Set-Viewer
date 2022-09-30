@@ -59,6 +59,13 @@ INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
     static WCHAR output[1024] = { 0x00 };// 入力内容保存用の変数
     static UINT dataSize = 0;
 
+    HWND hWnd = GetParent(hDlg);
+    INT w, h;
+    HDC hdc = NULL;
+    HDC hMemDC = NULL;
+    HGDIOBJ hgdiobj = NULL;
+    HBITMAP hBmp = NULL;
+
     UNREFERENCED_PARAMETER(lParam);
     switch (message)
     {
@@ -68,32 +75,68 @@ INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 
         dataSize = lstrlen(output);
 
-        SetDlgItemText(hDlg, IDC_EXTXT1, output);
+        //SetDlgItemText(hDlg, IDC_EXTXTTXT, output);
         dataSize = lstrlen(output);
+        
         return (INT_PTR)TRUE;
     case WM_COMMAND:
         switch (LOWORD(wParam))
         {
         case IDCANCEL:
             EndDialog(hDlg, LOWORD(wParam));
+            if (hgdiobj != NULL)SelectObject(hMemDC, hgdiobj);
+            if (hMemDC != NULL)DeleteDC(hMemDC);
+            if (hBmp != NULL)DeleteObject(hBmp);
+            if (hdc != NULL)ReleaseDC(hWnd, hdc);
             return (INT_PTR)TRUE;
-        case IDC_EXBTN:
+        case IDC_EXTXTBTN:
         {
             // 文字列のコピー
             if (!OpenClipboard(hDlg)) {
-                SetDlgItemText(hDlg, IDC_EXTXT2, TEXT("クリップボードを開くことができません"));
+                SetDlgItemText(hDlg, IDC_EXTXT, TEXT("クリップボードが開けません"));
                 return (INT_PTR)FALSE;
             }
 
             EmptyClipboard();
             hg = GlobalAlloc(GHND | GMEM_SHARE, dataSize * 2 + 1);
-            if (!hg)return (INT_PTR)FALSE;
+            if (!hg) {
+                CloseClipboard();
+                return (INT_PTR)FALSE;
+            }
             strMem = (CHAR*)GlobalLock(hg);
             lstrcpy((LPWSTR)strMem, output);
             GlobalUnlock(hg);
             SetClipboardData(CF_UNICODETEXT, hg);
             CloseClipboard();
-            SetDlgItemText(hDlg, IDC_EXTXT2, TEXT("クリップボードにコピーしました"));
+            SetDlgItemText(hDlg, IDC_EXTXT, TEXT("クリップボードにコピーしました"));
+            //SetDlgItemText(hDlg, IDC_EXTXT2, strMem);
+            //EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+        }
+        case IDC_EXBMPBTN:
+        {
+            // 画面のコピー
+            //hdc = GetDC(hDlg);
+            hdc = GetDC(hWnd);
+            w = GetDeviceCaps(hdc, HORZSIZE);
+            h = GetDeviceCaps(hdc, VERTSIZE);
+            hMemDC = CreateCompatibleDC(hdc);
+            hBmp = CreateCompatibleBitmap(hMemDC, w, h);
+            hgdiobj = SelectObject(hMemDC, hBmp);
+            BitBlt(hMemDC, 0, 0, w, h, hdc, 0, 0, SRCCOPY);
+            
+            if (hBmp == NULL) {
+                SetDlgItemText(hDlg, IDC_EXTXT, TEXT("ビットマップがNULLです"));
+                return (INT_PTR)FALSE;
+            }
+            if (!OpenClipboard(hDlg)) {
+                SetDlgItemText(hDlg, IDC_EXTXT, TEXT("クリップボードが開けません"));
+                return (INT_PTR)FALSE;
+            }
+            EmptyClipboard();
+            SetClipboardData(CF_BITMAP, hBmp);
+            CloseClipboard();
+            SetDlgItemText(hDlg, IDC_EXTXT, TEXT("クリップボードにコピーしました"));
             //SetDlgItemText(hDlg, IDC_EXTXT2, strMem);
             //EndDialog(hDlg, LOWORD(wParam));
             return (INT_PTR)TRUE;

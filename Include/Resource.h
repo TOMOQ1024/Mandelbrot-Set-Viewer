@@ -17,9 +17,11 @@
 
 #define IDM_EXPORT   				5100//
 #define IDD_EXBOX   				5101//
-#define IDC_EXTXT1   				5102//
-#define IDC_EXBTN   				5103//
-#define IDC_EXTXT2   				5104//
+#define IDC_EXTXTTXT   				5102//
+#define IDC_EXTXTBTN   				5103//
+#define IDC_EXBMPTXT   				5104//
+#define IDC_EXBMPBTN   				5105//
+#define IDC_EXTXT   				5106//
 
 #define IDM_SAVE   					5200//
 
