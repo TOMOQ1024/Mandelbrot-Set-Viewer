@@ -59,8 +59,9 @@ INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
     static WCHAR output[1024] = { 0x00 };// 入力内容保存用の変数
     static UINT dataSize = 0;
 
-    HWND hWnd = GetParent(hDlg);
+    HWND hWnd = NULL;
     INT w, h;
+    RECT rc;
     HDC hdc = NULL;
     HDC hMemDC = NULL;
     HGDIOBJ hgdiobj = NULL;
@@ -116,12 +117,28 @@ INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
         case IDC_EXBMPBTN:
         {
             // 画面のコピー
+            hWnd = GetParent(hDlg);
             //hdc = GetDC(hDlg);
             hdc = GetDC(hWnd);
-            w = GetDeviceCaps(hdc, HORZSIZE);
-            h = GetDeviceCaps(hdc, VERTSIZE);
+            if (hdc == NULL) {
+                SetDlgItemText(hDlg, IDC_EXTXT, TEXT("hdcがNULLです"));
+                return (INT_PTR)FALSE;
+            }
+            GetClientRect(hWnd, &rc);
+            w = rc.right - rc.left;
+            h = rc.bottom - rc.top;
+            //w = GetDeviceCaps(hdc, HORZRES);
+            //h = GetDeviceCaps(hdc, VERTRES);
             hMemDC = CreateCompatibleDC(hdc);
-            hBmp = CreateCompatibleBitmap(hMemDC, w, h);
+            if (hMemDC == NULL) {
+                SetDlgItemText(hDlg, IDC_EXTXT, TEXT("hMemDCがNULLです"));
+                return (INT_PTR)FALSE;
+            }
+            hBmp = CreateCompatibleBitmap(hdc, w, h);
+            if (hBmp == NULL) {
+                SetDlgItemText(hDlg, IDC_EXTXT, TEXT("hBmpがNULLです"));
+                return (INT_PTR)FALSE;
+            }
             hgdiobj = SelectObject(hMemDC, hBmp);
             BitBlt(hMemDC, 0, 0, w, h, hdc, 0, 0, SRCCOPY);
             
