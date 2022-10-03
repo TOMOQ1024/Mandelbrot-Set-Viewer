@@ -14,7 +14,8 @@ struct GRAPH{
 	double size;
 	double scale;
 	UINT limit;
-	int color_mode;
+	int inner_color_mode;
+	int outer_color_mode;
 	COLORREF color0;// Žû‘©•”
 	COLORREF color1;// ”­ŽU•”1
 	COLORREF color2;// ”­ŽU•”2

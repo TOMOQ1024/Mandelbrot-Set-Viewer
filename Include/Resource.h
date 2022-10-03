@@ -68,6 +68,13 @@
 #define IDM_INITAREA   				5510//
 #define IDM_INITCOLOR  				5520//
 
+#define GCM_I_SOLID					0
+#define GCM_I_GRAD					1
+#define GCM_O_TEMPLATE0				0
+#define GCM_O_TEMPLATE1				1
+#define GCM_O_TEMPLATE2				2
+#define GCM_O_CUSTOM				3
+
 #define IDI_MANDELBROTSET			107
 #define IDI_SMALL					108
 #define IDC_MANDELBROTSET			109

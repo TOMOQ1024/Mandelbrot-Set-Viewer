@@ -1,5 +1,7 @@
 #include "Color.h"
 #include "Graph.h"
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 extern struct GRAPH graph;
 
@@ -54,33 +56,51 @@ DWORD ColorAt(UINT x, UINT y, UINT width, UINT height)
 {
     //if ((x - width / 2) * (x - width / 2) + (y - height / 2) * (y - height / 2) < 50)return 0x00ff0000;
     int t = Calc(x, y, width, height);
-    if (t < 0) return (DWORD)graph.color0;
-    //return (DWORD)((t * 4 % 128 + 64) * 0x00010100);
-    //return (DWORD)HSV(t%128/128.0, 0.7, 1.0);
-    switch (graph.color_mode)
-    {
-    case 3:
-        return (DWORD)Grad(graph.color1, graph.color2, (1.0 * t / graph.limit - graph.color_stop0) / (graph.color_stop1 - graph.color_stop0));
-    default:
-        return (DWORD)HSV(t / 40.0, 1 - graph.color_mode / 3.0, 1);
+    if (t < 0) {
+        switch (graph.inner_color_mode) {
+        case GCM_I_SOLID:
+            return (DWORD)graph.color0;
+        case GCM_I_GRAD:
+            return (DWORD)Grad(graph.color1, graph.color2, (1.0 * t / graph.limit - graph.color_stop0) / (graph.color_stop1 - graph.color_stop0));
+        }
     }
-    //return (x + y) % 0x01000000;
-    //return (0x01000000 - 1) * (x + y) / (width + height);
+    else {
+        //return (DWORD)((t * 4 % 128 + 64) * 0x00010100);
+        //return (DWORD)HSV(t%128/128.0, 0.7, 1.0);
+        switch (graph.outer_color_mode)
+        {
+        case GCM_O_CUSTOM:
+            return (DWORD)Grad(graph.color1, graph.color2, (1.0 * t / graph.limit - graph.color_stop0) / (graph.color_stop1 - graph.color_stop0));
+        default:
+            return (DWORD)HSV(t / 40.0, 1 - graph.outer_color_mode / 3.0, 1);
+        }
+        //return (x + y) % 0x01000000;
+        //return (0x01000000 - 1) * (x + y) / (width + height);
+    }
 }
 
-int Calc(UINT x, UINT y, UINT width, UINT height)
+INT Calc(UINT x, UINT y, UINT width, UINT height)
 {
     UINT m = min(width, height);
     int i;
-    double zr, zi, tmp, cr, ci;
+    double zr, zi, tmp, cr, ci;// , tr, ti;
     zr = zi = 0;
+    //tr = ti = 0;
     cr = graph.x0 + (x - (double)width / 2) / m * graph.size;
     ci = graph.y0 + (y - (double)height / 2) / m * graph.size;
     for (i = 0; i <= (int)graph.limit; i++) {
         if (zr * zr + zi * zi > 4) return i;
+        //tr = zr; ti = zi;
         tmp = zr * zr - zi * zi + cr;
         zi = 2 * zr * zi + ci;
         zr = tmp;
+        //tr = zr - tr;
+        //ti = zi - ti;
     }
     return -1;
+    //return (INT)(fabs(atan2(zi, zr)) * graph.limit / M_PI);
+    //return (INT)(fabs(atan2(ti, tr)) * graph.limit / M_PI);
+    //return (INT)(sqrt(zi * zi + zr * zr) * graph.limit);
 }
+
+

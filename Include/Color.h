@@ -15,4 +15,4 @@ COLORREF Grad(COLORREF c0, COLORREF c1, double t);
 DWORD ColorAt(UINT x, UINT y, UINT width, UINT height);
 
 // width*heightのウィンドウにおける点(x,y)の漸化式適用回数を返す関数
-int Calc(UINT x, UINT y, UINT width, UINT height);
+INT Calc(UINT x, UINT y, UINT width, UINT height);

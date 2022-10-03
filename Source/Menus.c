@@ -202,7 +202,7 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
         cc[1].rgbResult = InvertColor(graph_cpy.color1);
         cc[2].rgbResult = InvertColor(graph_cpy.color2);
 
-        HWND hRadio = GetDlgItem(hDlg, IDC_SCRADIO1 + graph_cpy.color_mode);
+        HWND hRadio = GetDlgItem(hDlg, IDC_SCRADIO1 + graph_cpy.outer_color_mode);
         SendMessage(hRadio, BM_SETCHECK, 1, 0);
         SendDlgItemMessage(hDlg, IDC_SCSLIDER0, TBM_SETPOS, TRUE, (LPARAM)(graph_cpy.color_stop0 * 100));
         SendDlgItemMessage(hDlg, IDC_SCSLIDER1, TBM_SETPOS, TRUE, (LPARAM)(graph_cpy.color_stop1 * 100));
@@ -294,7 +294,7 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
         case IDC_SCRADIO3:
         case IDC_SCRADIO4:
         {
-            graph_cpy.color_mode = LOWORD(wParam) - IDC_SCRADIO1;
+            graph_cpy.outer_color_mode = LOWORD(wParam) - IDC_SCRADIO1;
             break;
         }
 
