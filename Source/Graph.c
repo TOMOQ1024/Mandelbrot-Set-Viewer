@@ -1,7 +1,7 @@
 #include "Graph.h"
 #include "Color.h"
+#include <omp.h>
 
-extern struct GRAPH graph;
 
 void InitGraph(UINT flg)
 {
@@ -23,7 +23,7 @@ void InitGraph(UINT flg)
 	}
 }
 
-void CopyGraph(struct GRAPH* gdest, struct GRAPH* gsrc)
+void CopyGraph(GRAPH* gdest, GRAPH* gsrc)
 {
 	gdest->x0 = gsrc->x0;
 	gdest->y0 = gsrc->y0;
@@ -38,7 +38,7 @@ void CopyGraph(struct GRAPH* gdest, struct GRAPH* gsrc)
 	gdest->color_mode = gsrc->color_mode;
 }
 
-BOOL SetGraphData(struct GRAPH *gdest, LPCWSTR input)
+BOOL SetGraphData(GRAPH *gdest, LPCWSTR input)
 {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!フォーマットに適合する文字列か判定!!!!!!!!!!!!!!!!!!!!!!!
 	int i = 0, j = 0, k = 0;
@@ -160,16 +160,20 @@ void GetGraphData(LPWSTR buf, size_t bufSize)
 }
 
 
-void SetBmp(HWND hWnd, BITMAPINFO* bmpInfo, LPDWORD lpPixel, UINT width, UINT height)
+void SetBmp(HWND hWnd, BITMAPINFO* bmpInfo, LPDWORD lpPixel)
 {
-	int y;
-	bmpInfo->bmiHeader.biWidth = width;
-	bmpInfo->bmiHeader.biHeight = height;
+	INT W = display.width;
+	INT H = display.height;
+	INT y;
+	bmpInfo->bmiHeader.biWidth = display.width;
+	bmpInfo->bmiHeader.biHeight = display.height;
 	// 裏画面への描画
-	#pragma omp parallel for
-	for (y = 0; y < (int)height; y++) {
-		for (int x = 0; x < (int)width; x++) {
-			lpPixel[x + y * width] = ColorAt(x, y, width, height);
+	
+#pragma omp parallel for
+	
+	for (y = 0; y < H; y++) {
+		for (int x = 0; x < W; x++) {
+			lpPixel[x + y * W] = ColorAt(x, y);
 		}
 	}
 	InvalidateRect(hWnd, NULL, FALSE);

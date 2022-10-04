@@ -4,7 +4,6 @@
 #include "Graph.h"
 #include "Color.h"
 #include "Menus.h"
-#include <omp.h>
 
 #define MAX_LOADSTRING 100
 
@@ -16,7 +15,15 @@ WCHAR szTitle[MAX_LOADSTRING];                  // タイトル バーのテキ�
 WCHAR szWindowClass[MAX_LOADSTRING];            // メイン ウィンドウ クラス名
 
 // グラフ構造体
-extern struct GRAPH graph;
+GRAPH graph;
+DISPLAY display;
+
+void SetDisplay(UINT w, UINT h)
+{
+    display.width = w;
+    display.height = h;
+    display.mlen = min(w, h);
+}
 
 
 // このコード モジュールに含まれる関数の宣言を転送します:
@@ -150,47 +157,45 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    static UINT width = 0, height = 0;
-
-    HDC hdc;// デバイスコンテキストのハンドル
-    PAINTSTRUCT ps;
+    static HDC hdc;// デバイスコンテキストのハンドル
+    static PAINTSTRUCT ps;
     static LPDWORD lpPixel;
     static BITMAPINFO bmpInfo;
     static int mx = -100, my = -100;
     BOOL m_in = FALSE;
-    UINT mlen = min(width, height);
 
     
     switch (message)
     {
     case WM_CREATE:
     {
-        width = GetSystemMetrics(SM_CXSCREEN);
-        height = GetSystemMetrics(SM_CYSCREEN);
-        mlen = min(width, height);
-        lpPixel = (LPDWORD)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, width * height * 4);
+        RECT rc;
+        GetClientRect(hWnd, &rc);
+        SetDisplay(rc.right - rc.left, rc.bottom - rc.top);
+        lpPixel = (LPDWORD)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, display.width * display.height * 4);
         // DIBの情報を設定する
         bmpInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
         bmpInfo.bmiHeader.biPlanes = 1;
         bmpInfo.bmiHeader.biBitCount = 32;
         bmpInfo.bmiHeader.biCompression = BI_RGB;
-        SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+        SetBmp(hWnd, &bmpInfo, lpPixel);
         break;
     }
     case WM_SIZE:
     {
-        mlen = min(width, height);
-        width = LOWORD(lParam);
-        height = HIWORD(lParam);
-        SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+        //mlen = min(width, height);
+        //width = LOWORD(lParam);
+        //height = HIWORD(lParam);
+        SetDisplay(LOWORD(lParam), HIWORD(lParam));
+        SetBmp(hWnd, &bmpInfo, lpPixel);
         break;
     }
     case WM_LBUTTONDOWN:
     {
-        graph.x0 += (mx - (double)width / 2) / mlen * graph.size;
-        graph.y0 -= (my - (double)height / 2) / mlen * graph.size;
+        graph.x0 += (mx - (double)display.width / 2) / display.mlen * graph.size;
+        graph.y0 -= (my - (double)display.height / 2) / display.mlen * graph.size;
         //graph.size *= 0.5;
-        SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+        SetBmp(hWnd, &bmpInfo, lpPixel);
         break;
         /*
         PAINTSTRUCT ps;//
@@ -232,8 +237,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         hdc = BeginPaint(hWnd, &ps);
         // 表画面へ転送
-        SetDIBitsToDevice(hdc, 0, 0, width, height, 0, 0, 0, height, lpPixel, &bmpInfo, DIB_RGB_COLORS);
-        StretchDIBits(hdc, 0, 0, width, height, 0, 0, width, height, lpPixel, &bmpInfo, DIB_RGB_COLORS, SRCCOPY);
+        SetDIBitsToDevice(hdc, 0, 0, display.width, display.height, 0, 0, 0, display.height, lpPixel, &bmpInfo, DIB_RGB_COLORS);
+        StretchDIBits(hdc, 0, 0, display.width, display.height, 0, 0, display.width, display.height, lpPixel, &bmpInfo, DIB_RGB_COLORS, SRCCOPY);
         //TCHAR str[128];
         //wsprintf(str, L"width: %d, height: %d", width, height);
         //TextOut(hdc, 10, 10, str, lstrlen(str));
@@ -266,11 +271,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         int k = /*GET_KEYSTATE_WPARAM(wParam) / */GET_WHEEL_DELTA_WPARAM(wParam);
         double sc = 0 < k ? graph.scale : 1 / graph.scale;
         //graph.x0 = (graph.x0 + (sc - 1) * (graph.x0 + (mx - (double)width / 2) / mlen * graph.size)) / sc;
-        graph.x0 += (sc - 1) * (mx - (double)width / 2) / mlen * graph.size / sc;
-        graph.y0 -= (sc - 1) * (my - (double)height / 2) / mlen * graph.size / sc;
+        graph.x0 += (sc - 1) * (mx - (double)display.width / 2) / display.mlen * graph.size / sc;
+        graph.y0 -= (sc - 1) * (my - (double)display.height / 2) / display.mlen * graph.size / sc;
         //graph.y0 = (graph.y0 - (sc - 1) * (my - (double)height / 2) / mlen * graph.size) / sc;
         graph.size /= sc;
-        SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+        SetBmp(hWnd, &bmpInfo, lpPixel);
         break;
     }
     case WM_MOUSEMOVE:
@@ -300,7 +305,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case IDM_IMPORT:
             if (DialogBox(hInst, MAKEINTRESOURCE(IDD_IMBOX), hWnd, MenuImport) == IDCANCEL) {
-                SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+                SetBmp(hWnd, &bmpInfo, lpPixel);
                 InvalidateRect(hWnd, NULL, FALSE);
             }
             break;
@@ -309,29 +314,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case IDM_SETCOLOR:
             if (DialogBox(hInst, MAKEINTRESOURCE(IDD_SCBOX), hWnd, MenuSetColor) == IDOK) {
-                SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+                SetBmp(hWnd, &bmpInfo, lpPixel);
                 InvalidateRect(hWnd, NULL, FALSE);
             }
             break;
         case IDM_SETLIMIT:
             if (DialogBox(hInst, MAKEINTRESOURCE(IDD_SLBOX), hWnd, MenuSetLimit) == IDCANCEL) {
-                SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+                SetBmp(hWnd, &bmpInfo, lpPixel);
                 InvalidateRect(hWnd, NULL, FALSE);
             }
             break;
         case IDM_INITALL:
             InitGraph(GRAPH_INIT_ALL);
-            SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+            SetBmp(hWnd, &bmpInfo, lpPixel);
             InvalidateRect(hWnd, NULL, FALSE);
             break;
         case IDM_INITAREA:
             InitGraph(GRAPH_INIT_AREA);
-            SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+            SetBmp(hWnd, &bmpInfo, lpPixel);
             InvalidateRect(hWnd, NULL, FALSE);
             break;
         case IDM_INITCOLOR:
             InitGraph(GRAPH_INIT_COLOR);
-            SetBmp(hWnd, &bmpInfo, lpPixel, width, height);
+            SetBmp(hWnd, &bmpInfo, lpPixel);
             InvalidateRect(hWnd, NULL, FALSE);
             break;
         default:
