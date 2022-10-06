@@ -171,8 +171,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         RECT rc;
         GetClientRect(hWnd, &rc);
-        SetDisplay(rc.right - rc.left, rc.bottom - rc.top);
-        lpPixel = (LPDWORD)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, display.width * display.height * 4);
+        //SetDisplay(rc.right - rc.left, rc.bottom - rc.top);
+        //SetDisplay(400, 400);
+        //SetDisplay(
+        //    GetSystemMetrics(SM_CXSCREEN),
+        //    GetSystemMetrics(SM_CYSCREEN)
+        //);
+        lpPixel = (LPDWORD)HeapAlloc(
+            GetProcessHeap(), HEAP_ZERO_MEMORY,
+            //display.width * display.height * 4
+            GetSystemMetrics(SM_CXSCREEN) * GetSystemMetrics(SM_CYSCREEN) * 4
+        );
         // DIBの情報を設定する
         bmpInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
         bmpInfo.bmiHeader.biPlanes = 1;
@@ -183,10 +192,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     case WM_SIZE:
     {
-        //mlen = min(width, height);
+        UINT mlen = display.mlen;
         //width = LOWORD(lParam);
         //height = HIWORD(lParam);
         SetDisplay(LOWORD(lParam), HIWORD(lParam));
+        //display.mlen = mlen;
         SetBmp(hWnd, &bmpInfo, lpPixel);
         break;
     }
