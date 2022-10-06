@@ -174,7 +174,7 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     static CHOOSECOLOR cc[3] = {{0}};
     static COLORREF CustColors[3][16];
     TCHAR ccode[8];
-    static struct GRAPH graph_cpy;
+    static GRAPH graph_cpy;
 
     HBRUSH hBrush, hOldBrush;
     HWND hCtrl;

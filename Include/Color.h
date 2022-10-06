@@ -1,7 +1,6 @@
 #pragma once
 
-#include "framework.h"
-#include "resource.h"
+#include "Main.h"
 
 // RGB <=> BGR
 COLORREF InvertColor(COLORREF color);
@@ -12,7 +11,7 @@ COLORREF HSV(double h, double s, double v);
 COLORREF Grad(COLORREF c0, COLORREF c1, double t);
 
 // width*heightのウィンドウにおける点(x,y)を塗る色を返す関数
-DWORD ColorAt(UINT x, UINT y, UINT width, UINT height);
+DWORD ColorAt(UINT x, UINT y);
 
 // width*heightのウィンドウにおける点(x,y)の漸化式適用回数を返す関数
-int Calc(UINT x, UINT y, UINT width, UINT height);
+int Calc(UINT x, UINT y);

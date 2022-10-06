@@ -1,8 +1,6 @@
 #include "Color.h"
 #include "Graph.h"
 
-extern struct GRAPH graph;
-
 COLORREF InvertColor(COLORREF color)
 {
     return RGB(GetBValue(color), GetGValue(color), GetRValue(color));
@@ -50,10 +48,10 @@ COLORREF Grad(COLORREF c0, COLORREF c1, double t)
     );
 }
 
-DWORD ColorAt(UINT x, UINT y, UINT width, UINT height)
+DWORD ColorAt(UINT x, UINT y)
 {
     //if ((x - width / 2) * (x - width / 2) + (y - height / 2) * (y - height / 2) < 50)return 0x00ff0000;
-    int t = Calc(x, y, width, height);
+    int t = Calc(x, y);
     if (t < 0) return (DWORD)graph.color0;
     //return (DWORD)((t * 4 % 128 + 64) * 0x00010100);
     //return (DWORD)HSV(t%128/128.0, 0.7, 1.0);
@@ -68,14 +66,13 @@ DWORD ColorAt(UINT x, UINT y, UINT width, UINT height)
     //return (0x01000000 - 1) * (x + y) / (width + height);
 }
 
-int Calc(UINT x, UINT y, UINT width, UINT height)
+int Calc(UINT x, UINT y)
 {
-    UINT m = min(width, height);
     int i;
     double zr, zi, tmp, cr, ci;
     zr = zi = 0;
-    cr = graph.x0 + (x - (double)width / 2) / m * graph.size;
-    ci = graph.y0 + (y - (double)height / 2) / m * graph.size;
+    cr = graph.x0 + (x - (double)display.width / 2) / display.mlen * graph.size;
+    ci = graph.y0 + (y - (double)display.height / 2) / display.mlen * graph.size;
     for (i = 0; i <= (int)graph.limit; i++) {
         if (zr * zr + zi * zi > 4) return i;
         tmp = zr * zr - zi * zi + cr;

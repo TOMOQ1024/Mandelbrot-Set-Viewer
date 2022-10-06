@@ -36,6 +36,7 @@
     <ClInclude Include="Include\Color.h" />
     <ClInclude Include="Include\framework.h" />
     <ClInclude Include="Include\Graph.h" />
+    <ClInclude Include="Include\Main.h" />
     <ClInclude Include="Include\Menus.h" />
     <ClInclude Include="Include\Resource.h" />
     <ClInclude Include="Include\targetver.h" />
