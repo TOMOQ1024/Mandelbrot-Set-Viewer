@@ -164,6 +164,33 @@ INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
     return (INT_PTR)FALSE;
 }
 
+// 画像保存
+VOID DlgImgSave(HWND hWnd)
+{
+    static OPENFILENAME ofn;
+    static TCHAR szPath[MAX_PATH] = { 0 };
+    static TCHAR szFile[MAX_PATH] = TEXT("hoge.jpg");
+
+    if (szPath[0] == TEXT('\0')) {
+        GetCurrentDirectory(MAX_PATH, szPath);
+    }
+    if (ofn.lStructSize == 0) {
+        ofn.lStructSize = sizeof(OPENFILENAME);
+        ofn.hwndOwner = hWnd;
+        ofn.lpstrInitialDir = szPath;
+        ofn.lpstrFile = szFile;
+        ofn.nMaxFile = MAX_PATH;
+        ofn.lpstrDefExt = TEXT(".png");
+        ofn.lpstrFilter = TEXT("PNG(*.png),JPEG(*.jpeg),BMP(*.bmp)\0*.png;*.jpeg;*.bmp\0");
+        ofn.lpstrTitle = NULL;
+        ofn.Flags = OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
+    }
+    if (GetSaveFileName(&ofn)) {
+        MessageBox(hWnd, szFile, TEXT("ファイル名を付けて保存"), MB_OK /*| MB_OKCANCEL*/);
+    }
+}
+
+
 
 // メニュー 配色の設定
 INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)

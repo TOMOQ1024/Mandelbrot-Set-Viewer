@@ -322,6 +322,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case IDM_EXPORT:
             DialogBox(hInst, MAKEINTRESOURCE(IDD_EXBOX), hWnd, MenuExport);
             break;
+        case IDM_SAVE:
+        {
+            DlgImgSave(hWnd);
+            break;
+        }
         case IDM_SETCOLOR:
             if (DialogBox(hInst, MAKEINTRESOURCE(IDD_SCBOX), hWnd, MenuSetColor) == IDOK) {
                 SetBmp(hWnd, &bmpInfo, lpPixel);
