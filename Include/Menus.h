@@ -9,6 +9,9 @@ INT_PTR CALLBACK    MenuImport(HWND, UINT, WPARAM, LPARAM);
 // 描画内容のエクスポートダイアログ
 INT_PTR CALLBACK    MenuExport(HWND, UINT, WPARAM, LPARAM);
 
+// 画像の保存
+VOID DlgImgSave(HWND hWnd);
+
 // 配色設定ダイアログ
 INT_PTR CALLBACK    MenuSetColor(HWND, UINT, WPARAM, LPARAM);
 

@@ -164,6 +164,93 @@ INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
     return (INT_PTR)FALSE;
 }
 
+// 画像保存
+VOID DlgImgSave(HWND hWnd)
+{
+    static OPENFILENAME ofn;
+    static TCHAR szPath[MAX_PATH] = { 0 };
+    static TCHAR szFile[MAX_PATH] = TEXT("Mandelbrot Set.png");
+    HANDLE hFile = NULL;
+
+    if (szPath[0] == TEXT('\0')) {
+        GetCurrentDirectory(MAX_PATH, szPath);
+    }
+    if (ofn.lStructSize == 0) {
+        ofn.lStructSize = sizeof(OPENFILENAME);
+        ofn.hwndOwner = hWnd;
+        ofn.lpstrInitialDir = szPath;
+        ofn.lpstrFile = szFile;
+        ofn.nMaxFile = MAX_PATH;
+        ofn.lpstrDefExt = TEXT(".png");
+        ofn.lpstrFilter = TEXT("PNG(*.png)\0*.png\0JPEG(*.jpg)\0*.jpg\0BMP(*.bmp)\0*.bmp\0");
+        ofn.lpstrTitle = NULL;
+        ofn.Flags = OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
+    }
+    if (GetSaveFileName(&ofn)) {
+        switch (MessageBox(hWnd, szPath, TEXT("ファイル名を付けて保存"), MB_OK /*| MB_OKCANCEL*/)) {
+        case IDOK:
+        {
+            hFile = CreateFile(
+                szFile, GENERIC_WRITE, 0, NULL,
+                CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL
+            );
+            if (hFile != INVALID_HANDLE_VALUE) {
+                LONG lHeadSize = (sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFO));
+                LONG lWidthSize = (display.width * sizeof(DWORD));
+                LONG lImageSize = (lWidthSize * display.height);
+                DWORD dwSize;
+
+                // BITMAPFILEHEADERの初期化
+                BITMAPFILEHEADER bmpHead = { 0 };
+                bmpHead.bfType = 0x4D42;
+                bmpHead.bfSize = lHeadSize + lImageSize;
+                bmpHead.bfReserved1 = 0;
+                bmpHead.bfReserved2 = 0;
+                bmpHead.bfOffBits = lHeadSize;
+
+                // BITMAPINFOの初期化
+                BITMAPINFO bmpInfo = { 0 };
+                bmpInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+                bmpInfo.bmiHeader.biWidth = display.width;
+                bmpInfo.bmiHeader.biHeight = display.height;
+                bmpInfo.bmiHeader.biPlanes = 1;
+                bmpInfo.bmiHeader.biBitCount = 32;
+                bmpInfo.bmiHeader.biCompression = BI_RGB;
+                bmpInfo.bmiHeader.biSizeImage = 0;
+                bmpInfo.bmiHeader.biXPelsPerMeter = 0;
+                bmpInfo.bmiHeader.biYPelsPerMeter = 0;
+                bmpInfo.bmiHeader.biClrUsed = 0;
+                bmpInfo.bmiHeader.biClrImportant = 0;
+
+                // DIBセクションの作成
+                LPDWORD lpPixel = NULL;
+                HBITMAP hBitmap = NULL;
+                HDC hSaveDC = NULL;
+                hBitmap = CreateDIBSection(
+                    NULL, &bmpInfo, DIB_RGB_COLORS,
+                    (LPVOID*)&lpPixel, NULL, 0
+                );
+                hSaveDC = CreateCompatibleDC(GetDC(hWnd));
+                if (hSaveDC != NULL && hBitmap != NULL)SelectObject(hSaveDC, hBitmap);
+                if (hSaveDC != NULL)BitBlt(hSaveDC, 0, 0, display.width, display.height, GetDC(hWnd), 0, 0, SRCCOPY);
+
+                // ファイルに書き込む
+                WriteFile(hFile, &bmpHead, sizeof(BITMAPFILEHEADER), &dwSize, NULL);
+                WriteFile(hFile, &bmpInfo, sizeof(bmpInfo), &dwSize, NULL);
+                WriteFile(hFile, lpPixel, lImageSize, &dwSize, NULL);
+
+                if(hSaveDC != NULL)DeleteDC(hSaveDC);
+                if(hBitmap != NULL)DeleteObject(hBitmap);
+                CloseHandle(hFile);
+            }
+            break;
+        }
+        }
+
+    }
+}
+
+
 
 // メニュー 配色の設定
 INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
