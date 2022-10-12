@@ -5,6 +5,7 @@ This is a Mandelbrot Set viewer with WINAPI.
 # DEMO
 
 You can explore the famous Mandelbrot Set 
+![sample 0](image/sample_0.png)
 
 # Features
 
