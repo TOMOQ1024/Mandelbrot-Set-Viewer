@@ -167,10 +167,24 @@ INT_PTR CALLBACK MenuExport(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 // ‰æ‘œ•Û‘¶
 VOID DlgImgSave(HWND hWnd)
 {
-    static OPENFILENAME ofn;
+    static OPENFILENAME ofn = { 0 };
     static TCHAR szPath[MAX_PATH] = { 0 };
-    static TCHAR szFile[MAX_PATH] = TEXT("Mandelbrot Set.png");
+    static TCHAR szFile[MAX_PATH] = { 0 };
     HANDLE hFile = NULL;
+    static SYSTEMTIME stTime = { 0 };
+
+    GetLocalTime(&stTime);
+
+    wsprintf(
+        szFile,
+        L"Mandelbrot Set %04d%02d%02d%02d%02d%02d",
+        stTime.wYear,
+        stTime.wMonth,
+        stTime.wDay,
+        stTime.wHour,
+        stTime.wMinute,
+        stTime.wSecond
+    );
 
     if (szPath[0] == TEXT('\0')) {
         GetCurrentDirectory(MAX_PATH, szPath);
