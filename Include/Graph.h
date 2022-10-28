@@ -13,12 +13,9 @@ typedef struct tagGRAPH {
 	double size;
 	double scale;
 	UINT limit;
-	int color_mode;
-	COLORREF color0;// Žû‘©•”
-	COLORREF color1;// ”­ŽU•”1
-	COLORREF color2;// ”­ŽU•”2
-	double color_stop0;
-	double color_stop1;
+	BOOL cyclic;
+	COLORREF colors[6];
+	double color_stops[5];
 } GRAPH;
 
 extern GRAPH graph;

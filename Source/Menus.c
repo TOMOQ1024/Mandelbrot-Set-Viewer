@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Menus.h"
 #include "Graph.h"
 #include "Color.h"
@@ -272,15 +270,16 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     // コモンコントロールの初期化
     InitCommonControls();
 
-    static CHOOSECOLOR cc[3] = {{0}};
-    static COLORREF CustColors[3][16];
-    TCHAR ccode[8];
+    static BOOL first_paint = TRUE;
+
+    static CHOOSECOLOR cc[6] = {{0}};
+    static COLORREF CustColors[6][16] = {{0}};
     static GRAPH graph_cpy;
 
     HBRUSH hBrush, hOldBrush;
     HWND hCtrl;
     HDC hdc;
-    RECT rc;
+    static RECT rcs[2] = { 0 };
 
 
     UNREFERENCED_PARAMETER(lParam);
@@ -289,128 +288,131 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     case WM_INITDIALOG:
     {
         //SetWindowPos(hDlg, NULL, 0, 0, 166*2, 110*2, (SWP_NOZORDER | SWP_NOOWNERZORDER));
+        first_paint = TRUE;
 
         // graphのコピー
         CopyGraph(&graph_cpy, &graph);
 
-        for (int i = 0; i < 3; i++) {
+        for (INT i = 0; i < 6; i++) {
             cc[i].lStructSize = sizeof(CHOOSECOLOR);
             cc[i].hwndOwner = hDlg;
+            //cc[i].hwndOwner = GetParent(hDlg);
+            for (INT j = 0; j < 16; j++) {
+                CustColors[i][j] = 0x00000000;
+            }
             cc[i].lpCustColors = CustColors[i];
             cc[i].Flags = CC_FULLOPEN | CC_RGBINIT;
+            cc[i].rgbResult = InvertColor(graph_cpy.colors[i]);
         }
-        cc[0].rgbResult = InvertColor(graph_cpy.color0);
-        cc[1].rgbResult = InvertColor(graph_cpy.color1);
-        cc[2].rgbResult = InvertColor(graph_cpy.color2);
 
-        HWND hRadio = GetDlgItem(hDlg, IDC_SCRADIO1 + graph_cpy.color_mode);
-        SendMessage(hRadio, BM_SETCHECK, 1, 0);
-        SendDlgItemMessage(hDlg, IDC_SCSLIDER0, TBM_SETPOS, TRUE, (LPARAM)(graph_cpy.color_stop0 * 100));
-        SendDlgItemMessage(hDlg, IDC_SCSLIDER1, TBM_SETPOS, TRUE, (LPARAM)(graph_cpy.color_stop1 * 100));
+        for (INT i = 0; i < 5; i++) {
+            SendDlgItemMessage(hDlg, IDC_SCSLIDER1 + i, TBM_SETPOS, TRUE, (LPARAM)(graph_cpy.color_stops[i] * 100));
+        }
+
+        for (int j = 0; j < 2; j++) {
+            hCtrl = GetDlgItem(hDlg, IDC_SCPREVIEW0 + j);
+            GetWindowRect(hCtrl, rcs + j);
+        }
         break;
     }
     case WM_CTLCOLORSTATIC:
     {
-        LONG i = GetWindowLong((HWND)lParam, GWL_ID);
-        if (i == IDC_SCDISPLAY0) {
-            SetBkColor((HDC)wParam, InvertColor(graph_cpy.color0));
-            wsprintf(ccode, L"#%02x%02x%02x", GetBValue(graph_cpy.color0), GetGValue(graph_cpy.color0), GetRValue(graph_cpy.color0));
-            SetDlgItemText(hDlg, IDC_SCCCODE0, (LPCTSTR)ccode);
-            return (INT_PTR)GetStockObject(NULL_BRUSH);
+        LONG k = GetWindowLong((HWND)lParam, GWL_ID);
+        for (INT i = 0; i < 6; i++) {
+            if (k == IDC_SCDISPLAY0 + i) {
+                SetBkColor((HDC)wParam, InvertColor(graph_cpy.colors[i]));
+                return (INT_PTR)GetStockObject(NULL_BRUSH);
+            }
         }
-        if (i >= IDC_SCDISPLAY1 && i <= IDC_SCDISPLAY4) {
-            return (INT_PTR)GetStockObject(NULL_BRUSH);
-        }
-        if (i == IDC_SCDISPLAY5) {
-            SetBkColor((HDC)wParam, InvertColor(graph_cpy.color1));
-            //wsprintf(ccode, L"#%02x%02x%02x", GetBValue(graph_cpy.color1), GetGValue(graph_cpy.color1), GetRValue(graph_cpy.color1));
-            //SetDlgItemText(hDlg, IDC_SCCCODE1, (LPCTSTR)ccode);
-            return (INT_PTR)GetStockObject(NULL_BRUSH);
-        }
-        if (i == IDC_SCDISPLAY6) {
-            SetBkColor((HDC)wParam, InvertColor(graph_cpy.color2));
-            //wsprintf(ccode, L"#%02x%02x%02x", GetBValue(graph_cpy.color2), GetGValue(graph_cpy.color2), GetRValue(graph_cpy.color2));
-            //SetDlgItemText(hDlg, IDC_SCCCODE2, (LPCTSTR)ccode);
-            return (INT_PTR)GetStockObject(NULL_BRUSH);
+        if (first_paint) {
+            InvalidateRect(hDlg, NULL, FALSE);
+            first_paint = FALSE;
         }
         break;
     }
+    //case WM_ERASEBKGND: return (INT_PTR)TRUE;
     case WM_PAINT:
     {
-        for (int j = 0; j < 4; j++) {
-            hCtrl = GetDlgItem(hDlg, IDC_SCDISPLAY1 + j);
-            GetWindowRect(hCtrl, &rc);
+        for (int j = 0; j < 2; j++) {
+            hCtrl = GetDlgItem(hDlg, IDC_SCPREVIEW0 + j);
             hdc = GetDC(hCtrl);
             SelectObject(hdc, GetStockObject(NULL_PEN));
             hBrush = CreateSolidBrush(RGB(255, 0, 0));
             hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
-            for (int i = 0; i < rc.right - rc.left; i++) {
+            for (int i = 0; i < rcs[j].right - rcs[j].left; i++) {
                 DeleteObject(
                     SelectObject(hdc, hBrush = CreateSolidBrush(
-                        j == 3
-                        ? Grad(InvertColor(graph_cpy.color1), InvertColor(graph_cpy.color2), (1.0 * i / (rc.right - rc.left) - graph_cpy.color_stop0) / (graph_cpy.color_stop1 - graph_cpy.color_stop0))
-                        : HSV(1.0 * i / (rc.right - rc.left), 1 - j / 3.0, 1)
+                        j
+                        ? InvertColor(GetColor(&graph_cpy, 1.0 * i / (rcs[j].right - rcs[j].left)))
+                        : InvertColor(graph_cpy.colors[0])
                     ))
                 );
-                Rectangle(hdc, i, 0, i + 2, rc.bottom - rc.top);
+                Rectangle(hdc, i, 0, i + 2, rcs[j].bottom - rcs[j].top);
             }
-            SelectObject(hdc, hOldBrush);
-            DeleteObject(hBrush);
+            DeleteObject(SelectObject(hdc, hOldBrush));
             ReleaseDC(hCtrl, hdc);
         }
         break;
     }
     case WM_HSCROLL:
     {
-        if ((HWND)lParam == GetDlgItem(hDlg, IDC_SCSLIDER0)) {
-            graph_cpy.color_stop0 = SendDlgItemMessage(hDlg,IDC_SCSLIDER0, TBM_GETPOS, 0, 0) / 100.0;
+        for (INT i = 0; i < 5; i++) {
+            if ((HWND)lParam == GetDlgItem(hDlg, IDC_SCSLIDER1 + i)) {
+                graph_cpy.color_stops[i] = SendDlgItemMessage(hDlg, IDC_SCSLIDER1 + i, TBM_GETPOS, 0, 0) / 100.0;
+            }
         }
-        if ((HWND)lParam == GetDlgItem(hDlg, IDC_SCSLIDER1)) {
-            graph_cpy.color_stop1 = SendDlgItemMessage(hDlg, IDC_SCSLIDER1, TBM_GETPOS, 0, 0) / 100.0;
-        }
-        InvalidateRect(hDlg, NULL, FALSE);
+        InvalidateRect(hDlg, rcs + 1, FALSE);
         break;
     }
     case WM_COMMAND:
+    {
+        // 色設定ボタン
+        //for (INT i = 0; i < 6; i++) {
+        //    if (lwp == IDC_SCBUTTON0 + i) {
+        //        if (!ChooseColor(&cc[i]))return (INT_PTR)FALSE;
+        //        graph_cpy.colors[i] = InvertColor(cc[i].rgbResult);
+        //        //InvalidateRect(hDlg, rcs + (i ? 1 : 0), FALSE);
+        //        //InvalidateRect(hDlg, NULL, FALSE);
+        //        return (INT_PTR)FALSE;
+        //    }
+        //}
+
         switch (LOWORD(wParam))
         {
         case IDC_SCBUTTON0:
-            if (!ChooseColor(&cc[0]))return (INT_PTR)FALSE;
-            graph_cpy.color0 = InvertColor(cc[0].rgbResult);
-            InvalidateRect(hDlg, NULL, FALSE);
-            break;
         case IDC_SCBUTTON1:
-            if (!ChooseColor(&cc[1]))return (INT_PTR)FALSE;
-            graph_cpy.color1 = InvertColor(cc[1].rgbResult);
-            InvalidateRect(hDlg, NULL, FALSE);
-            break;
         case IDC_SCBUTTON2:
-            if (!ChooseColor(&cc[2]))return (INT_PTR)FALSE;
-            graph_cpy.color2 = InvertColor(cc[2].rgbResult);
-            InvalidateRect(hDlg, NULL, FALSE);
-            break;
-
-        case IDC_SCRADIO1:
-        case IDC_SCRADIO2:
-        case IDC_SCRADIO3:
-        case IDC_SCRADIO4:
+        case IDC_SCBUTTON3:
+        case IDC_SCBUTTON4:
+        case IDC_SCBUTTON5:
         {
-            graph_cpy.color_mode = LOWORD(wParam) - IDC_SCRADIO1;
+            INT i = (INT)LOWORD(wParam) - IDC_SCBUTTON0;
+            if (!ChooseColor(&cc[i]))break;
+            graph_cpy.colors[i] = InvertColor(cc[i].rgbResult);
+            InvalidateRect(hDlg, rcs + (i ? 1 : 0), FALSE);
+            //InvalidateRect(hDlg, r, FALSE);
+            break;
+        }
+        case IDC_SCCHECKBOX:
+        {
+            //graph_cpy.color_mode = LOWORD(wParam) - IDC_SCRADIO1;
             break;
         }
 
         case IDC_SCBUTTONOK:
-            EndDialog(hDlg, IDOK);
             CopyGraph(&graph, &graph_cpy);
-            return (INT_PTR)TRUE;
         case IDC_SCBUTTONCANCEL:
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
         case IDCANCEL:
             EndDialog(hDlg, LOWORD(wParam));
             return (INT_PTR)TRUE;
         }
         break;
+    }
+    default: 
+    {
+        UINT i = message;
+        i += 0;
+    }
     }
     return (INT_PTR)FALSE;
 }

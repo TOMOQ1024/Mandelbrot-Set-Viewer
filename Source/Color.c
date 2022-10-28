@@ -1,5 +1,8 @@
 #include "Color.h"
 #include "Graph.h"
+#include <math.h>
+
+#define fAbs(a) (a<-a ? -a : a)
 
 COLORREF InvertColor(COLORREF color)
 {
@@ -48,22 +51,74 @@ COLORREF Grad(COLORREF c0, COLORREF c1, double t)
     );
 }
 
+// 0 <= v <= 1
+COLORREF GetColor(GRAPH* g, double v)
+{
+    COLORREF tmp_cr = 0;
+    double tmp_lf = 0;
+    double cstops[7] = { 0 };
+    COLORREF colors[7] = { 0 };
+
+    // graphÇÃì«Ç›éÊÇË
+    for (INT i = 0; i < 5; i++) {
+        cstops[i + 1] = g->color_stops[i];
+        colors[i + 1] = g->colors[i + 1];
+    }
+
+    // cstops, colors 1~5 ÇÃÉ\Å[Ég
+    for (INT i = 2; i < 6; i++) {
+        for (INT j = 1; j < i; j++) {
+            if (cstops[i] < cstops[j]) {
+                tmp_lf = cstops[i];
+                cstops[i] = cstops[j];
+                cstops[j] = tmp_lf;
+                tmp_cr = colors[i];
+                colors[i] = colors[j];
+                colors[j] = tmp_cr;
+            }
+        }
+    }
+
+    if (g->cyclic) {
+        // èzä¬
+        cstops[0] = cstops[5] - 1;
+        colors[0] = colors[5];
+        cstops[6] = cstops[1] + 1;
+        colors[6] = colors[1];
+    }
+    else {
+        // îÒèzä¬
+        cstops[0] = 0;
+        colors[0] = colors[1];
+        cstops[6] = 1;
+        colors[6] = colors[5];
+    }
+    for (INT i = 0; i < 6; i++) {
+        if (v < cstops[i + 1]) {
+            if (fAbs(cstops[i + 1] - cstops[i]) < 1e-10)continue;
+            return RGB(
+                (GetRValue(colors[i + 1]) - GetRValue(colors[i])) * (v - cstops[i]) / (cstops[i + 1] - cstops[i]) + GetRValue(colors[i]),
+                (GetGValue(colors[i + 1]) - GetGValue(colors[i])) * (v - cstops[i]) / (cstops[i + 1] - cstops[i]) + GetGValue(colors[i]),
+                (GetBValue(colors[i + 1]) - GetBValue(colors[i])) * (v - cstops[i]) / (cstops[i + 1] - cstops[i]) + GetBValue(colors[i])
+                );
+        }
+    }
+    return 0;
+}
+
 DWORD ColorAt(UINT x, UINT y)
 {
     //if ((x - width / 2) * (x - width / 2) + (y - height / 2) * (y - height / 2) < 50)return 0x00ff0000;
     int t = Calc(x, y);
-    if (t < 0) return (DWORD)graph.color0;
+    if (t < 0) return (DWORD)graph.colors[0];
     //return (DWORD)((t * 4 % 128 + 64) * 0x00010100);
     //return (DWORD)HSV(t%128/128.0, 0.7, 1.0);
-    switch (graph.color_mode)
-    {
-    case 3:
-        return (DWORD)Grad(graph.color1, graph.color2, (1.0 * t / graph.limit - graph.color_stop0) / (graph.color_stop1 - graph.color_stop0));
-    default:
-        return (DWORD)HSV(t / 40.0, 1 - graph.color_mode / 3.0, 1);
+    if (graph.cyclic) {
+        return GetColor(&graph, fmod(t/100.0, 100));
     }
-    //return (x + y) % 0x01000000;
-    //return (0x01000000 - 1) * (x + y) / (width + height);
+    else {
+        return GetColor(&graph, 1.0 * t / graph.limit);
+    }
 }
 
 int Calc(UINT x, UINT y)

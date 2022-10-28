@@ -25,36 +25,43 @@
 
 #define IDM_SAVE   					5200//
 
+
+// 
 #define IDM_SETCOLOR   				5300//
 #define IDD_SCBOX   				5301//
+
 #define IDC_SCGROUP0   				5302//
 #define IDC_SCGROUP1   				5303//
-#define IDC_SCSTATIC0   			5304//
-#define IDC_SCSTATIC1   			5305//
-#define IDC_SCSTATIC2   			5306//
-//#define IDC_SCTVALUE0   			5307//
-//#define IDC_SCTVALUE1   			5308//
-#define IDC_SCDISPLAY0   			5309//
-#define IDC_SCDISPLAY1 				5310//
-#define IDC_SCDISPLAY2   			5311//
-#define IDC_SCDISPLAY3   			5312//
-#define IDC_SCDISPLAY4   			5313//
-#define IDC_SCDISPLAY5   			5314//
-#define IDC_SCDISPLAY6   			5315//
-#define IDC_SCRADIO1   				5316//
-#define IDC_SCRADIO2   				5317//
-#define IDC_SCRADIO3   				5318//
-#define IDC_SCRADIO4   				5319//
-#define IDC_SCCCODE0   				5320//
-//#define IDC_SCCCODE1   				5321//
-//#define IDC_SCCCODE2   				5322//
-#define IDC_SCBUTTON0   			5323//
-#define IDC_SCBUTTON1   			5324//
-#define IDC_SCBUTTON2   			5325//
-#define IDC_SCSLIDER0   			5326//
-#define IDC_SCSLIDER1   			5327//
-#define IDC_SCBUTTONOK   			5328//
-#define IDC_SCBUTTONCANCEL   		5329//
+#define IDC_SCCHECKBOX 				5304//
+
+#define IDC_SCPREVIEW0   			5310//
+#define IDC_SCPREVIEW1   			5311//
+
+#define IDC_SCDISPLAY0   			5320//
+#define IDC_SCDISPLAY1 				5321//
+#define IDC_SCDISPLAY2 				5322//
+#define IDC_SCDISPLAY3 				5323//
+#define IDC_SCDISPLAY4 				5324//
+#define IDC_SCDISPLAY5 				5325//
+#define IDC_SCDISPLAY6 				5326//
+
+#define IDC_SCBUTTON0   			5330//
+#define IDC_SCBUTTON1   			5331//
+#define IDC_SCBUTTON2   			5332//
+#define IDC_SCBUTTON3   			5333//
+#define IDC_SCBUTTON4   			5334//
+#define IDC_SCBUTTON5   			5335//
+
+#define IDC_SCSLIDER1   			5341//
+#define IDC_SCSLIDER2   			5342//
+#define IDC_SCSLIDER3   			5343//
+#define IDC_SCSLIDER4   			5344//
+#define IDC_SCSLIDER5   			5345//
+
+#define IDC_SCBUTTONOK   			5398//
+#define IDC_SCBUTTONCANCEL   		5399//
+
+
 
 #define IDM_SETLIMIT   				5400//
 #define IDD_SLBOX   				5401//

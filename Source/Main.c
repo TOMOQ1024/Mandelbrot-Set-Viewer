@@ -328,7 +328,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         }
         case IDM_SETCOLOR:
-            if (DialogBox(hInst, MAKEINTRESOURCE(IDD_SCBOX), hWnd, MenuSetColor) == IDOK) {
+            if (DialogBox(hInst, MAKEINTRESOURCE(IDD_SCBOX), hWnd, MenuSetColor) == IDC_SCBUTTONOK) {
                 SetBmp(hWnd, &bmpInfo, lpPixel);
                 InvalidateRect(hWnd, NULL, FALSE);
             }
@@ -363,10 +363,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         HeapFree(GetProcessHeap(), 0, lpPixel);
         PostQuitMessage(0);
         break;
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
     }
-    return 0;
+    return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 
