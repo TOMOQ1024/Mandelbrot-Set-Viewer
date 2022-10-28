@@ -114,7 +114,7 @@ DWORD ColorAt(UINT x, UINT y)
     //return (DWORD)((t * 4 % 128 + 64) * 0x00010100);
     //return (DWORD)HSV(t%128/128.0, 0.7, 1.0);
     if (graph.cyclic) {
-        return GetColor(&graph, fmod(t/100.0, 100));
+        return GetColor(&graph, fmod(t/100.0, 1));
     }
     else {
         return GetColor(&graph, 1.0 * t / graph.limit);

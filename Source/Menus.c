@@ -276,6 +276,8 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     static COLORREF CustColors[6][16] = {{0}};
     static GRAPH graph_cpy;
 
+    static HWND hCheckBox;
+
     HBRUSH hBrush, hOldBrush;
     HWND hCtrl;
     HDC hdc;
@@ -292,6 +294,8 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 
         // graphのコピー
         CopyGraph(&graph_cpy, &graph);
+        
+        hCheckBox = GetDlgItem(hDlg, IDC_SCCHECKBOX);
 
         for (INT i = 0; i < 6; i++) {
             cc[i].lStructSize = sizeof(CHOOSECOLOR);
@@ -313,6 +317,7 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
             hCtrl = GetDlgItem(hDlg, IDC_SCPREVIEW0 + j);
             GetWindowRect(hCtrl, rcs + j);
         }
+        SendMessage(hCheckBox, BM_SETCHECK, graph_cpy.cyclic ? BST_CHECKED : BST_UNCHECKED, 0);
         break;
     }
     case WM_CTLCOLORSTATIC:
@@ -330,7 +335,6 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
         }
         break;
     }
-    //case WM_ERASEBKGND: return (INT_PTR)TRUE;
     case WM_PAINT:
     {
         for (int j = 0; j < 2; j++) {
@@ -366,17 +370,6 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     }
     case WM_COMMAND:
     {
-        // 色設定ボタン
-        //for (INT i = 0; i < 6; i++) {
-        //    if (lwp == IDC_SCBUTTON0 + i) {
-        //        if (!ChooseColor(&cc[i]))return (INT_PTR)FALSE;
-        //        graph_cpy.colors[i] = InvertColor(cc[i].rgbResult);
-        //        //InvalidateRect(hDlg, rcs + (i ? 1 : 0), FALSE);
-        //        //InvalidateRect(hDlg, NULL, FALSE);
-        //        return (INT_PTR)FALSE;
-        //    }
-        //}
-
         switch (LOWORD(wParam))
         {
         case IDC_SCBUTTON0:
@@ -389,16 +382,18 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
             INT i = (INT)LOWORD(wParam) - IDC_SCBUTTON0;
             if (!ChooseColor(&cc[i]))break;
             graph_cpy.colors[i] = InvertColor(cc[i].rgbResult);
-            InvalidateRect(hDlg, rcs + (i ? 1 : 0), FALSE);
-            //InvalidateRect(hDlg, r, FALSE);
+            //InvalidateRect(hDlg, rcs + (i ? 1 : 0), FALSE);
+            //first_paint = TRUE;
+            //InvalidateRect(hDlg, NULL, FALSE);
+            SendMessage(hDlg, WM_PAINT, 0, 0);
             break;
         }
         case IDC_SCCHECKBOX:
         {
-            //graph_cpy.color_mode = LOWORD(wParam) - IDC_SCRADIO1;
+            graph_cpy.cyclic = SendMessage(hCheckBox, BM_GETCHECK, 0, 0) == BST_CHECKED;
+            InvalidateRect(hDlg, rcs + 1, FALSE);
             break;
         }
-
         case IDC_SCBUTTONOK:
             CopyGraph(&graph, &graph_cpy);
         case IDC_SCBUTTONCANCEL:
