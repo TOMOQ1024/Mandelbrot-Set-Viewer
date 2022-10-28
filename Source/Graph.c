@@ -1,7 +1,7 @@
 #include "Graph.h"
 #include "Color.h"
 #include <omp.h>
-
+#define N 16
 
 void InitGraph(UINT flg)
 {
@@ -64,10 +64,9 @@ void CopyGraph(GRAPH* gdest, GRAPH* gsrc)
 
 BOOL SetGraphData(GRAPH *gdest, LPCWSTR input)
 {
-	return FALSE;
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!フォーマットに適合する文字列か判定!!!!!!!!!!!!!!!!!!!!!!!
-	int i = 0, j = 0, k = 0;
-	WCHAR data[10][50] = { {0} };
+	INT i = 0, j = 0, k = 0;
+	WCHAR data[N][50] = { {0} };
 	while (input[i + j]) {
 		if (input[i + j] == L'/') {
 			k += 1;
@@ -79,24 +78,30 @@ BOOL SetGraphData(GRAPH *gdest, LPCWSTR input)
 			i += 1;
 		}
 	}
-	if (k != 9)return FALSE;
+	//if (k != N - 1)return FALSE;
 	
 	
-	WCHAR names[10][19] = {
+	WCHAR names[N][30] = {
 		L"RE:",
 		L"IM:",
 		L"SIZE:",
-		L"COLOR_A:",
-		L"COLOR_B:",
-		L"COLOR_C:",
-		L"COLOR_STOP_A:",
-		L"COLOR_STOP_B:",
-		L"COLOR_MODE:",
 		L"LIMIT:",
+		L"CYCLIC:",
+		L"COLOR_0:",
+		L"COLOR_1:",
+		L"COLOR_2:",
+		L"COLOR_3:",
+		L"COLOR_4:",
+		L"COLOR_5:",
+		L"CSTOP_0:",
+		L"CSTOP_1:",
+		L"CSTOP_2:",
+		L"CSTOP_3:",
+		L"CSTOP_4:"
 	};
 
-	INT boo[16] = { 0 };
-	for (i = 0; i < 16; i++)boo[i] = -1;
+	INT boo[N] = { 0 };
+	for (i = 0; i < N; i++)boo[i] = -1;
 
 	typedef enum tagTYPE {
 		TYPE_DOUBLE,
@@ -105,28 +110,30 @@ BOOL SetGraphData(GRAPH *gdest, LPCWSTR input)
 		TYPE_UINT,
 	} TYPE;
 
-	TYPE typeof[16] = {
+	TYPE typeof[N] = {
 		TYPE_DOUBLE,
 		TYPE_DOUBLE,
 		TYPE_DOUBLE,
-		TYPE_COLORREF,
-		TYPE_COLORREF,
-		TYPE_COLORREF,
-		TYPE_COLORREF,
-		TYPE_COLORREF,
-		TYPE_COLORREF,
-		TYPE_DOUBLE,
-		TYPE_DOUBLE,
-		TYPE_DOUBLE,
-		TYPE_DOUBLE,
-		TYPE_DOUBLE,
-		TYPE_INT,
 		TYPE_UINT,
+		TYPE_INT,
+		TYPE_COLORREF,
+		TYPE_COLORREF,
+		TYPE_COLORREF,
+		TYPE_COLORREF,
+		TYPE_COLORREF,
+		TYPE_COLORREF,
+		TYPE_DOUBLE,
+		TYPE_DOUBLE,
+		TYPE_DOUBLE,
+		TYPE_DOUBLE,
+		TYPE_DOUBLE,
 	};
-	void* pointers[16] = {
+	void* pointers[N] = {
 		&(gdest->x0),
 		&(gdest->y0),
 		&(gdest->size),
+		&(gdest->limit),
+		&(gdest->cyclic),
 		&(gdest->colors[0]),
 		&(gdest->colors[1]),
 		&(gdest->colors[2]),
@@ -138,13 +145,10 @@ BOOL SetGraphData(GRAPH *gdest, LPCWSTR input)
 		&(gdest->color_stops[2]),
 		&(gdest->color_stops[3]),
 		&(gdest->color_stops[4]),
-		&(gdest->cyclic),
-		//&(gdest->scale),
-		&(gdest->limit),
 	};
 
 	for (i = 0; i <= k; i++) {
-		for (j = 0; j < 16; j++) {
+		for (j = 0; j < N; j++) {
 			if (0 <= boo[j])continue;
 			if (wcsncmp(names[j], data[i], lstrlen(names[j])) == 0) {
 				boo[j] = i;
@@ -152,12 +156,13 @@ BOOL SetGraphData(GRAPH *gdest, LPCWSTR input)
 		}
 	}
 
-	for (j = 0; j < 10; j++) {
-		if (boo[j] < 0)return FALSE;
-	}
+	//for (j = 0; j < 10; j++) {
+	//	if (boo[j] < 0)return FALSE;
+	//}
 
-	/* 以下，適切な入力があったときのみ実行 */
-	for (j = 0; j < 10; j++) {
+	// /* 以下，適切な入力があったときのみ実行 */
+	for (j = 0; j < N; j++) {
+		if (boo[j] < 0)continue;
 		switch (typeof[j]) {
 		case TYPE_DOUBLE:
 			swscanf_s(data[boo[j]] + lstrlen(names[j]), L"%lf", (double*)pointers[j]);
@@ -187,13 +192,17 @@ BOOL SetGraphData(GRAPH *gdest, LPCWSTR input)
 
 void GetGraphData(LPWSTR buf, size_t bufSize)
 {
-	//swprintf(
-	//	buf, bufSize,
-	//	L"RE:%29.20Lf/IM:%29.20Lf/SIZE:%29.20Lf/COLOR_A:%06lx/COLOR_B:%06lx/COLOR_C:%06lx/COLOR_STOP_A:%4.2Lf/COLOR_STOP_B:%4.2Lf/COLOR_MODE:%d/LIMIT:%u",
-	//	graph.x0, graph.y0, graph.size,
-	//	graph.colors0, graph.color1, graph.color2, graph.color_stop0, graph.color_stop1,
-	//	graph.color_mode, /*graph.scale, */graph.limit
-	//);
+	swprintf(
+		buf, bufSize,
+		L"RE:%.20Lf/IM:%.20Lf/SIZE:%.20Lf/LIMIT:%u/CYCLIC:%d/\
+		COLOR_0:%06lx/COLOR_1:%06lx/COLOR_2:%06lx/COLOR_3:%06lx/COLOR_4:%06lx/COLOR_5:%06lx/\
+		CSTOP_0:%4.2Lf/CSTOP_1:%4.2Lf/CSTOP_2:%4.2Lf/CSTOP_3:%4.2Lf/CSTOP_4:%4.2Lf",
+		graph.x0, graph.y0, graph.size, graph.limit, graph.cyclic,
+		graph.colors[0], graph.colors[1], graph.colors[2],
+		graph.colors[3], graph.colors[4], graph.colors[5],
+		graph.color_stops[0], graph.color_stops[1], graph.color_stops[2],
+		graph.color_stops[3], graph.color_stops[4]
+	);
 }
 
 
