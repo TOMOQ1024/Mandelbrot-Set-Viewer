@@ -194,9 +194,7 @@ void GetGraphData(LPWSTR buf, size_t bufSize)
 {
 	swprintf(
 		buf, bufSize,
-		L"RE:%.20Lf/IM:%.20Lf/SIZE:%.20Lf/LIMIT:%u/CYCLIC:%d/\
-		COLOR_0:%06lx/COLOR_1:%06lx/COLOR_2:%06lx/COLOR_3:%06lx/COLOR_4:%06lx/COLOR_5:%06lx/\
-		CSTOP_0:%4.2Lf/CSTOP_1:%4.2Lf/CSTOP_2:%4.2Lf/CSTOP_3:%4.2Lf/CSTOP_4:%4.2Lf",
+		L"RE:%.20Lf/IM:%.20Lf/SIZE:%.20Lf/LIMIT:%u/CYCLIC:%d/COLOR_0:%06lx/COLOR_1:%06lx/COLOR_2:%06lx/COLOR_3:%06lx/COLOR_4:%06lx/COLOR_5:%06lx/CSTOP_0:%4.2Lf/CSTOP_1:%4.2Lf/CSTOP_2:%4.2Lf/CSTOP_3:%4.2Lf/CSTOP_4:%4.2Lf",
 		graph.x0, graph.y0, graph.size, graph.limit, graph.cyclic,
 		graph.colors[0], graph.colors[1], graph.colors[2],
 		graph.colors[3], graph.colors[4], graph.colors[5],
