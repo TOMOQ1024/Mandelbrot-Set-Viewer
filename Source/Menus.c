@@ -365,7 +365,8 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
                 graph_cpy.color_stops[i] = SendDlgItemMessage(hDlg, IDC_SCSLIDER1 + i, TBM_GETPOS, 0, 0) / 100.0;
             }
         }
-        InvalidateRect(hDlg, rcs + 1, FALSE);
+        //InvalidateRect(hDlg, rcs + 1, FALSE);
+        SendMessage(hDlg, WM_PAINT, 0, 0);
         break;
     }
     case WM_COMMAND:
@@ -385,6 +386,8 @@ INT_PTR CALLBACK MenuSetColor(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
             //InvalidateRect(hDlg, rcs + (i ? 1 : 0), FALSE);
             //first_paint = TRUE;
             //InvalidateRect(hDlg, NULL, FALSE);
+            RECT rc = { 50, 400 };
+            InvalidateRect(hDlg, &rc, FALSE);
             SendMessage(hDlg, WM_PAINT, 0, 0);
             break;
         }
