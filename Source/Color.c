@@ -129,10 +129,15 @@ int Calc(UINT x, UINT y)
     cr = graph.x0 + (x - (double)display.width / 2) / display.mlen * graph.size;
     ci = graph.y0 + (y - (double)display.height / 2) / display.mlen * graph.size;
     for (i = 0; i <= (int)graph.limit; i++) {
-        if (zr * zr + zi * zi > 4) return i;
+        //if (zr * zr * zr * zr + zi * zi * zi * zi> 4) return i;
+        //tmp = zr * zr * zr * zr - zi * zi * zi *zi + cr;
+        if (zr * zr + zi * zi> 4) return i;
         tmp = zr * zr - zi * zi + cr;
         zi = 2 * zr * zi + ci;
         zr = tmp;
+        //tmp = (zr * zr - zi * zi) * zr - (2 * zr * zi + ci) * zi + cr;
+        //zi = 2 * (zr * zr - zi * zi) * (2 * zr * zi + ci) + ci;
+        //zr = tmp;
     }
     return -1;
 }

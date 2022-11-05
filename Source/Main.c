@@ -180,7 +180,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         lpPixel = (LPDWORD)HeapAlloc(
             GetProcessHeap(), HEAP_ZERO_MEMORY,
             //display.width * display.height * 4
-            GetSystemMetrics(SM_CXSCREEN) * GetSystemMetrics(SM_CYSCREEN) * 4
+            max(
+                GetSystemMetrics(SM_CXSCREEN) * GetSystemMetrics(SM_CYSCREEN),
+                2000 * 2000
+            ) * 4
         );
         // DIBの情報を設定する
         bmpInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
