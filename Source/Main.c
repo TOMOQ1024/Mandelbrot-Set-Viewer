@@ -183,7 +183,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             max(
                 GetSystemMetrics(SM_CXSCREEN) * GetSystemMetrics(SM_CYSCREEN),
                 2000 * 2000
-            ) * 4
+            ) * 4 * 4
         );
         // DIBの情報を設定する
         bmpInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
